@@ -6,27 +6,27 @@ const config: Config = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: "#7C5CFC",
+          DEFAULT: "#8D6CE6",
           dark: "#5B3FD4",
-          light: "#F1EDFF",
+          light: "rgba(141, 108, 230, 0.16)",
         },
-        background: "#F8F9FC",
-        surface: "#FFFFFF",
+        background: "#0B0817",
+        surface: "#170F2C",
         text: {
-          DEFAULT: "#17171A",
-          secondary: "#6B7280",
+          DEFAULT: "#F5F3FF",
+          secondary: "#9C94B8",
         },
-        border: "#E5E7EB",
-        success: "#22A06B",
-        warning: "#D99A00",
-        danger: "#D64545",
-        info: "#3B82F6",
+        border: "rgba(255, 255, 255, 0.12)",
+        success: "#34D399",
+        warning: "#FBBF24",
+        danger: "#F87171",
+        info: "#7DD3FC",
       },
       fontFamily: {
         sans: ["var(--font-inter)", "system-ui", "sans-serif"],
       },
       borderRadius: {
-        card: "16px",
+        card: "20px",
         control: "10px",
       },
       boxShadow: {

@@ -25,9 +25,8 @@ import { formatCurrency, formatCurrencyCompact, monthLabelShort } from "@/lib/ut
 
 export default function DashboardPage() {
   const [period, setPeriod] = useState<PeriodFilterValue>(() => ({
-    mode: "months",
+    mode: "year",
     year: new Date().getFullYear(),
-    months: [new Date().getMonth()],
   }));
   const monthKeys = useMemo(() => monthKeysFromPeriod(period), [period]);
 
@@ -84,7 +83,7 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3">
+      <div className="flex flex-wrap items-center justify-between gap-3 pl-5">
         <div className="flex flex-col gap-1">
           <h1 className="text-xl font-semibold text-white">Dashboard</h1>
           <p className="text-sm text-white/50">Visão geral financeira.</p>

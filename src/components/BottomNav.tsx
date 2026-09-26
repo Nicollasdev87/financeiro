@@ -102,7 +102,7 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               onClick={() => setMoreOpen(false)}
-              className="rounded-control px-3 py-2 text-sm hover:bg-black/5"
+              className="rounded-control px-3 py-2 text-sm hover:bg-white/10"
             >
               {item.label}
             </Link>

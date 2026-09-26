@@ -58,7 +58,7 @@ export function CurrencyInput({ value, onCommit, className, placeholder, align =
     return (
       <div
         className={cn(
-          "flex w-full items-center gap-1 rounded-control border border-primary bg-white px-2 py-1",
+          "flex w-full items-center gap-1 rounded-control border border-primary bg-surface px-2 py-1",
           className
         )}
       >

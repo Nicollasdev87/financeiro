@@ -7,8 +7,8 @@
 }
 
 body {
-  background-color: #F8F9FC;
-  color: #17171A;
+  background-color: #0B0817;
+  color: #F5F3FF;
 }
 
 ::-webkit-scrollbar {
@@ -16,7 +16,7 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: #E5E7EB;
+  background-color: rgba(255, 255, 255, 0.15);
   border-radius: 999px;
 }
 
