@@ -1,9 +1,18 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { LayoutDashboard, CalendarRange, CreditCard, TrendingUp, Tags, Settings } from "lucide-react";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  LayoutDashboard,
+  CalendarRange,
+  CreditCard,
+  TrendingUp,
+  Tags,
+  Settings,
+  LogOut,
+} from "lucide-react";
 import { cn } from "@/lib/utils";
+import { createClient } from "@/lib/supabase/client";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -15,17 +24,22 @@ const NAV = [
 ];
 
 /**
- * Floating icon-only rail — detached from the viewport edge with margin and
- * fully rounded corners, rather than a flush full-height panel. Labels move
- * to native tooltips (title attribute) so the nav stays usable without
- * on-screen text.
+ * Floating icon-only rail, fixed to the viewport so it never scrolls with
+ * the page. Labels move to native tooltips (title attribute).
  */
 export function Sidebar() {
   const pathname = usePathname();
+  const router = useRouter();
+
+  async function handleLogout() {
+    const supabase = createClient();
+    await supabase.auth.signOut();
+    router.push("/login");
+  }
 
   return (
-    <aside className="sticky top-4 z-30 my-4 ml-4 hidden w-16 shrink-0 self-start flex-col items-center gap-2 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#140F27] to-[#0F0B1D] py-4 shadow-xl shadow-black/30 md:flex">
-      <nav className="flex flex-col items-center gap-2">
+    <aside className="fixed left-4 top-4 z-40 hidden w-16 flex-col items-center gap-5 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#140F27] to-[#0F0B1D] py-5 shadow-xl shadow-black/30 md:flex">
+      <nav className="flex flex-col items-center gap-5">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -46,6 +60,17 @@ export function Sidebar() {
           );
         })}
       </nav>
+
+      <div className="h-px w-8 bg-white/10" />
+
+      <button
+        onClick={handleLogout}
+        title="Sair"
+        aria-label="Sair"
+        className="flex h-10 w-10 items-center justify-center rounded-2xl text-white/45 transition-colors hover:bg-[#D780D6]/15 hover:text-[#E5A6E1]"
+      >
+        <LogOut className="h-5 w-5" />
+      </button>
     </aside>
   );
 }

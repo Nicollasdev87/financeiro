@@ -9,23 +9,19 @@ import { cn } from "@/lib/utils";
 export function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   // Only the dashboard has been reskinned dark so far — everywhere else
-  // keeps its original light page background untouched.
+  // keeps its original light page background untouched. Setting the color
+  // on this root (instead of on a floating panel with margins) means there
+  // is no gap anywhere that can show the light body color through.
   const dark = pathname.startsWith("/dashboard");
 
   return (
-    <div className="flex min-h-screen gap-4">
+    <div className={cn("min-h-screen", dark && "bg-[#0B0817]")}>
       <Sidebar />
-      <div className="flex min-w-0 flex-1 flex-col items-center">
-        <div
-          className={cn(
-            "w-full max-w-[1400px]",
-            dark &&
-              "my-4 mr-4 rounded-[32px] border border-white/10 bg-gradient-to-br from-[#140F27] via-[#170F2C] to-[#0F0B1D] shadow-xl shadow-black/30"
-          )}
-        >
-          <TopNav />
-          <main className="w-full px-4 pb-24 pt-0 md:px-6 md:pb-10">{children}</main>
-        </div>
+      <TopNav />
+      {/* pl matches the fixed rail's width + gap; pr matches the rail's own
+          left inset, so this column lines up under the fixed top nav. */}
+      <div className="flex flex-col items-center px-4 md:pl-24 md:pr-4">
+        <main className="w-full max-w-[1400px] pb-24 pt-4 md:pb-10 md:pt-24">{children}</main>
       </div>
       <BottomNav />
     </div>
