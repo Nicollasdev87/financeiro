@@ -10,20 +10,16 @@ import {
   YAxis,
   Tooltip,
   CartesianGrid,
-  PieChart,
-  Pie,
-  Cell,
   Legend,
 } from "recharts";
-import { FinancialCard } from "@/components/FinancialCard";
-import { Card } from "@/components/ui/Card";
+import { GlassCard } from "@/components/dashboard/GlassCard";
+import { StatChip } from "@/components/dashboard/StatChip";
+import { DonutChart } from "@/components/dashboard/DonutChart";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { useMonthData } from "@/lib/hooks/useMonthData";
 import { useMonthsSummary } from "@/lib/hooks/useMonthsSummary";
 import { PAYMENT_METHOD_LABELS, PaymentMethod } from "@/lib/types";
 import { formatCurrency, formatCurrencyCompact, monthLabel, monthLabelShort } from "@/lib/utils";
-
-const PIE_COLORS = ["#7C5CFC", "#3B82F6", "#22A06B", "#D99A00", "#D64545", "#6B7280", "#5B3FD4"];
 
 export default function DashboardPage() {
   const [date] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
@@ -46,9 +42,7 @@ export default function DashboardPage() {
       if (!cat) continue;
       map[cat.name] = (map[cat.name] ?? 0) + e.total;
     }
-    return Object.entries(map)
-      .map(([name, value]) => ({ name, value }))
-      .sort((a, b) => b.value - a.value);
+    return Object.entries(map).map(([name, value]) => ({ name, value }));
   }, [expenses, categories]);
 
   const byMethod = useMemo(() => {
@@ -70,95 +64,110 @@ export default function DashboardPage() {
   if (loadingHousehold) return <p className="text-sm text-text-secondary">Carregando...</p>;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold capitalize">{monthLabel(date)}</h1>
-        <p className="text-sm text-text-secondary">Visão geral das finanças da família</p>
+    <div className="-m-4 rounded-3xl bg-gradient-to-br from-[#140F27] via-[#170F2C] to-[#0F0B1D] p-4 md:-m-8 md:p-8">
+      <div className="mb-6 flex flex-col gap-1">
+        <h1 className="text-xl font-semibold capitalize text-white">{monthLabel(date)}</h1>
+        <p className="text-sm text-white/50">Visão geral das finanças da família</p>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <FinancialCard label="Receitas" value={totalIncome} icon={ArrowUpCircle} tone="success" />
-        <FinancialCard label="Despesas" value={totalExpenses} icon={ArrowDownCircle} tone="danger" />
-        <FinancialCard label="Saldo" value={balance} icon={Wallet2} tone="primary" />
-        <FinancialCard label="Cartão" value={totalCredit} icon={CreditCard} tone="neutral" />
-      </div>
-
-      <Card>
-        <h3 className="mb-4 font-medium">Receitas x Despesas</h3>
-        <ResponsiveContainer width="100%" height={240}>
-          <BarChart data={summaries.map((s) => ({ ...s, label: monthLabelShort(s.date) }))}>
-            <CartesianGrid vertical={false} stroke="#E5E7EB" />
-            <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
-            <YAxis tickLine={false} axisLine={false} fontSize={12} tickFormatter={(v) => formatCurrencyCompact(v)} />
-            <Tooltip formatter={(v: number) => formatCurrency(v)} />
-            <Legend />
-            <Bar dataKey="income" name="Receitas" fill="#22A06B" radius={[4, 4, 0, 0]} />
-            <Bar dataKey="expenses" name="Despesas" fill="#D64545" radius={[4, 4, 0, 0]} />
-          </BarChart>
-        </ResponsiveContainer>
-      </Card>
-
-      <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-        <Card>
-          <h3 className="mb-4 font-medium">Gastos por categoria</h3>
-          {byCategory.length === 0 ? (
-            <p className="text-sm text-text-secondary">Nenhum gasto lançado neste mês.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie data={byCategory} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90}>
-                  {byCategory.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </Card>
-
-        <Card>
-          <h3 className="mb-4 font-medium">Gastos por forma de pagamento</h3>
-          {byMethod.length === 0 ? (
-            <p className="text-sm text-text-secondary">Nenhum gasto lançado neste mês.</p>
-          ) : (
-            <ResponsiveContainer width="100%" height={240}>
-              <PieChart>
-                <Pie data={byMethod} dataKey="value" nameKey="name" innerRadius={55} outerRadius={90}>
-                  {byMethod.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v: number) => formatCurrency(v)} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          )}
-        </Card>
-      </div>
-
-      <Card>
-        <h3 className="mb-4 font-medium">Quem gastou?</h3>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          {byPerson.map(({ member, income, expenses: exp }) => (
-            <div key={member.id} className="rounded-control border border-border p-3">
-              <div className="mb-2 flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full" style={{ backgroundColor: member.color }} />
-                <span className="font-medium">{member.display_name}</span>
+      <div className="flex flex-col gap-4">
+        {/* 1. Quem gastou */}
+        <GlassCard>
+          <h3 className="mb-4 font-medium text-white">Quem gastou?</h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            {byPerson.map(({ member, income, expenses: exp }) => (
+              <div
+                key={member.id}
+                className="rounded-2xl border border-white/10 bg-white/[0.03] p-4"
+              >
+                <div className="mb-3 flex items-center gap-2">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: member.color ?? "#8D6CE6" }}
+                  />
+                  <span className="font-medium text-white">{member.display_name}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">Receitas</span>
+                  <span className="tabular-nums text-[#9FE0E4]">{formatCurrency(income)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-white/50">Despesas</span>
+                  <span className="tabular-nums text-[#E5A6E1]">{formatCurrency(exp)}</span>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Receitas</span>
-                <span className="tabular-nums text-success">{formatCurrency(income)}</span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-text-secondary">Despesas</span>
-                <span className="tabular-nums text-danger">{formatCurrency(exp)}</span>
-              </div>
-            </div>
-          ))}
+            ))}
+            {byPerson.length === 0 && (
+              <p className="text-sm text-white/50">Nenhum integrante cadastrado ainda.</p>
+            )}
+          </div>
+        </GlassCard>
+
+        {/* 2. Receitas x Despesas */}
+        <GlassCard>
+          <h3 className="mb-4 font-medium text-white">Receitas x Despesas</h3>
+          <ResponsiveContainer width="100%" height={240}>
+            <BarChart data={summaries.map((s) => ({ ...s, label: monthLabelShort(s.date) }))}>
+              <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.08)" />
+              <XAxis
+                dataKey="label"
+                tickLine={false}
+                axisLine={false}
+                fontSize={12}
+                tick={{ fill: "rgba(255,255,255,0.5)" }}
+              />
+              <YAxis
+                tickLine={false}
+                axisLine={false}
+                fontSize={12}
+                tick={{ fill: "rgba(255,255,255,0.5)" }}
+                tickFormatter={(v) => formatCurrencyCompact(v)}
+              />
+              <Tooltip
+                formatter={(v: number) => formatCurrency(v)}
+                contentStyle={{
+                  background: "#1C1533",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: 12,
+                  color: "#fff",
+                }}
+              />
+              <Legend wrapperStyle={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }} />
+              <Bar dataKey="income" name="Receitas" fill="#7ECED4" radius={[6, 6, 0, 0]} />
+              <Bar dataKey="expenses" name="Despesas" fill="#D780D6" radius={[6, 6, 0, 0]} />
+            </BarChart>
+          </ResponsiveContainer>
+        </GlassCard>
+
+        {/* 3. Resumo rápido */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <StatChip label="Receitas" value={totalIncome} icon={ArrowUpCircle} tone="teal" />
+          <StatChip label="Despesas" value={totalExpenses} icon={ArrowDownCircle} tone="pink" />
+          <StatChip label="Saldo" value={balance} icon={Wallet2} tone="purple" />
+          <StatChip label="Cartão" value={totalCredit} icon={CreditCard} tone="neutral" />
         </div>
-      </Card>
+
+        {/* 4. Gastos por categoria / forma de pagamento */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+          <GlassCard>
+            <h3 className="mb-4 font-medium text-white">Gastos por categoria</h3>
+            {byCategory.length === 0 ? (
+              <p className="text-sm text-white/50">Nenhum gasto lançado neste mês.</p>
+            ) : (
+              <DonutChart data={byCategory} maxSlices={6} />
+            )}
+          </GlassCard>
+
+          <GlassCard>
+            <h3 className="mb-4 font-medium text-white">Gastos por forma de pagamento</h3>
+            {byMethod.length === 0 ? (
+              <p className="text-sm text-white/50">Nenhum gasto lançado neste mês.</p>
+            ) : (
+              <DonutChart data={byMethod} maxSlices={6} />
+            )}
+          </GlassCard>
+        </div>
+      </div>
     </div>
   );
 }
