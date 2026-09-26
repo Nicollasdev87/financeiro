@@ -14,7 +14,7 @@ export function FinancialCard({
   tone?: "neutral" | "success" | "danger" | "primary";
 }) {
   const tones = {
-    neutral: "text-text bg-black/5",
+    neutral: "text-text bg-overlay/5",
     success: "text-success bg-success/10",
     danger: "text-danger bg-danger/10",
     primary: "text-primary bg-primary-light",

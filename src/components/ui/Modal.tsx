@@ -17,7 +17,7 @@ export function Modal({ open, onClose, title, children }: ModalProps) {
       <div className="w-full max-w-md rounded-t-card bg-surface p-5 sm:rounded-card">
         <div className="mb-4 flex items-center justify-between">
           <h3 className="text-lg font-semibold">{title}</h3>
-          <button onClick={onClose} className="rounded-control p-1 hover:bg-white/10">
+          <button onClick={onClose} className="rounded-control p-1 hover:bg-overlay/5">
             <X className="h-5 w-5 text-text-secondary" />
           </button>
         </div>

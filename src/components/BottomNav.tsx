@@ -27,7 +27,7 @@ export function BottomNav() {
 
   return (
     <>
-      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-surface px-2 py-2 pb-[env(safe-area-inset-bottom,0px)] md:hidden">
+      <nav className="fixed inset-x-0 bottom-0 z-40 flex items-center justify-around border-t border-border bg-background px-2 py-2 pb-[env(safe-area-inset-bottom,0px)] md:hidden">
         {ITEMS.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
@@ -102,7 +102,7 @@ export function BottomNav() {
               key={item.href}
               href={item.href}
               onClick={() => setMoreOpen(false)}
-              className="rounded-control px-3 py-2 text-sm hover:bg-white/10"
+              className="rounded-control px-3 py-2 text-sm hover:bg-overlay/5"
             >
               {item.label}
             </Link>

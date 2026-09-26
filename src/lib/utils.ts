@@ -31,8 +31,6 @@ const MONTH_NAMES = [
   "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro",
 ];
 
-export const MONTH_SHORT_NAMES = MONTH_NAMES.map((m) => m.slice(0, 3));
-
 export function monthLabel(date: Date): string {
   return `${MONTH_NAMES[date.getMonth()]} de ${date.getFullYear()}`;
 }
@@ -45,11 +43,6 @@ export function toMonthKey(date: Date): string {
   const y = date.getFullYear();
   const m = String(date.getMonth() + 1).padStart(2, "0");
   return `${y}-${m}-01`;
-}
-
-export function fromMonthKey(key: string): Date {
-  const [y, m] = key.split("-").map(Number);
-  return new Date(y, m - 1, 1);
 }
 
 export function addMonths(date: Date, delta: number): Date {

@@ -5,12 +5,16 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianG
 import { Card } from "@/components/ui/Card";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { useMonthsSummary } from "@/lib/hooks/useMonthsSummary";
+import { useTheme } from "@/lib/theme";
+import { CHART_COLORS, tooltipStyle } from "@/lib/chartColors";
 import { formatCurrency, formatCurrencyCompact, monthLabelShort } from "@/lib/utils";
 
 export default function EvolucaoPage() {
   const [date] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const { householdId, loading } = useHouseholdData();
   const { summaries } = useMonthsSummary(householdId, date, 6);
+  const { theme } = useTheme();
+  const c = CHART_COLORS[theme];
 
   if (loading) return <p className="text-sm text-text-secondary">Carregando...</p>;
 
@@ -32,15 +36,21 @@ export default function EvolucaoPage() {
       <Card>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={chartData}>
-            <CartesianGrid vertical={false} stroke="#E5E7EB" />
-            <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} />
-            <YAxis tickLine={false} axisLine={false} fontSize={12} tickFormatter={(v) => formatCurrencyCompact(v)} />
-            <Tooltip formatter={(v: number) => formatCurrency(v)} />
-            <Legend />
-            <Line type="monotone" dataKey="Receitas" stroke="#22A06B" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="Despesas" stroke="#D64545" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="Saldo" stroke="#7C5CFC" strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="Cartão" stroke="#D99A00" strokeWidth={2} dot={false} />
+            <CartesianGrid vertical={false} stroke={c.grid} />
+            <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} tick={{ fill: c.axisText }} />
+            <YAxis
+              tickLine={false}
+              axisLine={false}
+              fontSize={12}
+              tick={{ fill: c.axisText }}
+              tickFormatter={(v) => formatCurrencyCompact(v)}
+            />
+            <Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={tooltipStyle(c)} />
+            <Legend wrapperStyle={{ color: c.axisText, fontSize: 12 }} />
+            <Line type="monotone" dataKey="Receitas" stroke={c.success} strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="Despesas" stroke={c.danger} strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="Saldo" stroke={c.primaryLine} strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="Cartão" stroke={c.warning} strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </Card>
