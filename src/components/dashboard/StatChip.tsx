@@ -21,7 +21,7 @@ export function StatChip({
 }) {
   const t = TONES[tone];
   return (
-    <div className="flex items-center gap-3 rounded-2xl border border-white/10 bg-white/[0.04] p-4 backdrop-blur-sm">
+    <div className="flex items-center gap-3 rounded-2xl border border-white/[0.09] bg-white/[0.065] p-4 backdrop-blur-sm">
       <div className={cn("flex h-10 w-10 shrink-0 items-center justify-center rounded-xl", t.bg, t.text)}>
         <Icon className="h-5 w-5" />
       </div>

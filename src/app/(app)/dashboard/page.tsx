@@ -17,17 +17,23 @@ import { GlassCard } from "@/components/dashboard/GlassCard";
 import { StatChip } from "@/components/dashboard/StatChip";
 import { DonutChart } from "@/components/dashboard/DonutChart";
 import { StackedBar } from "@/components/dashboard/StackedBar";
+import { PeriodFilter, PeriodFilterValue, monthKeysFromPeriod } from "@/components/dashboard/PeriodFilter";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
-import { useMonthData } from "@/lib/hooks/useMonthData";
-import { useMonthsSummary } from "@/lib/hooks/useMonthsSummary";
+import { useSelectedMonthsData, useSelectedMonthsSummaries } from "@/lib/hooks/useSelectedMonths";
 import { PAYMENT_METHOD_LABELS, PaymentMethod } from "@/lib/types";
-import { formatCurrency, formatCurrencyCompact, monthLabel, monthLabelShort } from "@/lib/utils";
+import { formatCurrency, formatCurrencyCompact, monthLabelShort } from "@/lib/utils";
 
 export default function DashboardPage() {
-  const [date] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [period, setPeriod] = useState<PeriodFilterValue>(() => ({
+    mode: "months",
+    year: new Date().getFullYear(),
+    months: [new Date().getMonth()],
+  }));
+  const monthKeys = useMemo(() => monthKeysFromPeriod(period), [period]);
+
   const { householdId, categories, members, loading: loadingHousehold } = useHouseholdData();
-  const { expenses, incomes } = useMonthData(householdId, date);
-  const { summaries } = useMonthsSummary(householdId, date, 6);
+  const { expenses, incomes } = useSelectedMonthsData(householdId, monthKeys);
+  const { summaries } = useSelectedMonthsSummaries(householdId, monthKeys);
 
   const totalIncome = incomes.reduce((s, i) => s + i.amount, 0);
   const totalExpenses = expenses.reduce((s, e) => s + e.total, 0);
@@ -65,7 +71,8 @@ export default function DashboardPage() {
 
   // Colunas divergentes: receitas somam para cima a partir do zero, despesas
   // (negativadas) somam para baixo — o mesmo stackId faz as duas "empilharem"
-  // a partir do eixo zero em vez de uma sobre a outra.
+  // a partir do eixo zero em vez de uma sobre a outra. Uma barra por mês
+  // selecionado no filtro (ou pelos 12 meses do ano, no modo "Ano atual").
   const divergingData = summaries.map((s) => ({
     label: monthLabelShort(s.date),
     income: s.income,
@@ -73,17 +80,20 @@ export default function DashboardPage() {
   }));
   const maxAbs = Math.max(1, ...divergingData.flatMap((d) => [Math.abs(d.income), Math.abs(d.expenses)]));
 
-  if (loadingHousehold) return <p className="text-sm text-text-secondary">Carregando...</p>;
+  if (loadingHousehold) return <p className="text-sm text-white/50">Carregando...</p>;
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-xl font-semibold capitalize text-white">{monthLabel(date)}</h1>
-        <p className="text-sm text-white/50">Visão geral das finanças da família</p>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-white">Dashboard</h1>
+          <p className="text-sm text-white/50">Visão geral financeira.</p>
+        </div>
+        <PeriodFilter value={period} onChange={setPeriod} />
       </div>
 
       <div className="flex flex-col gap-4">
-        {/* 1. Resumo rápido — agora no topo */}
+        {/* 1. Resumo rápido */}
         <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
           <StatChip label="Receitas" value={totalIncome} icon={ArrowUpCircle} tone="teal" />
           <StatChip label="Despesas" value={totalExpenses} icon={ArrowDownCircle} tone="pink" />
@@ -97,7 +107,7 @@ export default function DashboardPage() {
             <h3 className="mb-4 font-medium text-white">Quem gastou?</h3>
             <div className="flex flex-col gap-3">
               {byPerson.map(({ member, income, expenses: exp }) => (
-                <div key={member.id} className="rounded-2xl border border-white/10 bg-white/[0.03] p-4">
+                <div key={member.id} className="rounded-2xl border border-white/[0.08] bg-white/[0.05] p-4">
                   <div className="mb-3 flex items-center gap-2">
                     <span
                       className="h-2.5 w-2.5 rounded-full"
