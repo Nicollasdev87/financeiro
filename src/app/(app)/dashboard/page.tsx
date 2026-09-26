@@ -11,6 +11,7 @@ import {
   Tooltip,
   CartesianGrid,
   Legend,
+  ReferenceLine,
 } from "recharts";
 import { GlassCard } from "@/components/dashboard/GlassCard";
 import { StatChip } from "@/components/dashboard/StatChip";
@@ -61,6 +62,16 @@ export default function DashboardPage() {
       expenses: expenses.filter((e) => e.member_id === m.id).reduce((s, e) => s + e.total, 0),
     }));
   }, [members, incomes, expenses]);
+
+  // Colunas divergentes: receitas somam para cima a partir do zero, despesas
+  // (negativadas) somam para baixo — o mesmo stackId faz as duas "empilharem"
+  // a partir do eixo zero em vez de uma sobre a outra.
+  const divergingData = summaries.map((s) => ({
+    label: monthLabelShort(s.date),
+    income: s.income,
+    expenses: -s.expenses,
+  }));
+  const maxAbs = Math.max(1, ...divergingData.flatMap((d) => [Math.abs(d.income), Math.abs(d.expenses)]));
 
   if (loadingHousehold) return <p className="text-sm text-text-secondary">Carregando...</p>;
 
@@ -113,7 +124,7 @@ export default function DashboardPage() {
           <GlassCard className="lg:col-span-3">
             <h3 className="mb-4 font-medium text-white">Receitas x Despesas</h3>
             <ResponsiveContainer width="100%" height={260}>
-              <BarChart data={summaries.map((s) => ({ ...s, label: monthLabelShort(s.date) }))}>
+              <BarChart data={divergingData} stackOffset="sign">
                 <CartesianGrid vertical={false} stroke="rgba(255,255,255,0.08)" />
                 <XAxis
                   dataKey="label"
@@ -123,14 +134,17 @@ export default function DashboardPage() {
                   tick={{ fill: "rgba(255,255,255,0.5)" }}
                 />
                 <YAxis
+                  domain={[-maxAbs, maxAbs]}
                   tickLine={false}
                   axisLine={false}
                   fontSize={12}
                   tick={{ fill: "rgba(255,255,255,0.5)" }}
-                  tickFormatter={(v) => formatCurrencyCompact(v)}
+                  tickFormatter={(v) => formatCurrencyCompact(Math.abs(v))}
                 />
+                <ReferenceLine y={0} stroke="rgba(255,255,255,0.25)" />
                 <Tooltip
-                  formatter={(v: number) => formatCurrency(v)}
+                  formatter={(v: number) => formatCurrency(Math.abs(v))}
+                  cursor={{ fill: "rgba(141, 108, 230, 0.12)" }}
                   contentStyle={{
                     background: "#1C1533",
                     border: "1px solid rgba(255,255,255,0.1)",
@@ -139,8 +153,8 @@ export default function DashboardPage() {
                   }}
                 />
                 <Legend wrapperStyle={{ color: "rgba(255,255,255,0.7)", fontSize: 12 }} />
-                <Bar dataKey="income" name="Receitas" fill="#7ECED4" radius={[6, 6, 0, 0]} />
-                <Bar dataKey="expenses" name="Despesas" fill="#D780D6" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="income" name="Receitas" fill="#7ECED4" stackId="a" radius={[6, 6, 0, 0]} />
+                <Bar dataKey="expenses" name="Despesas" fill="#D780D6" stackId="a" radius={[0, 0, 6, 6]} />
               </BarChart>
             </ResponsiveContainer>
           </GlassCard>
