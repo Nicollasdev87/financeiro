@@ -14,33 +14,34 @@ const NAV = [
   { href: "/configuracoes", label: "Configurações", icon: Settings },
 ];
 
+/**
+ * Slim icon-only rail, always dark regardless of the page's own theme —
+ * mirrors the reference screenshot. Labels move to native tooltips
+ * (title attribute) so the nav stays usable without on-screen text.
+ */
 export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="hidden w-60 shrink-0 flex-col border-r border-border bg-surface p-4 md:flex">
-      <div className="mb-6 flex items-center gap-2 px-2">
-        <div className="flex h-8 w-8 items-center justify-center rounded-control bg-primary text-white">
-          <Wallet className="h-4 w-4" />
-        </div>
-        <span className="font-semibold">Organizador</span>
+    <aside className="sticky top-0 hidden h-screen w-20 shrink-0 flex-col items-center gap-2 bg-gradient-to-b from-[#140F27] to-[#0F0B1D] py-5 md:flex">
+      <div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-gradient-to-br from-[#8D6CE6] to-[#5B3FD4] text-white">
+        <Wallet className="h-5 w-5" />
       </div>
-      <nav className="flex flex-1 flex-col gap-1">
+      <nav className="flex flex-1 flex-col items-center gap-2">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);
           return (
             <Link
               key={href}
               href={href}
+              title={label}
+              aria-label={label}
               className={cn(
-                "flex items-center gap-3 rounded-control px-3 py-2 text-sm font-medium transition-colors",
-                active
-                  ? "bg-primary-light text-primary-dark"
-                  : "text-text-secondary hover:bg-black/5 hover:text-text"
+                "flex h-11 w-11 items-center justify-center rounded-2xl transition-colors",
+                active ? "bg-white/15 text-white" : "text-white/45 hover:bg-white/10 hover:text-white/80"
               )}
             >
-              <Icon className="h-4 w-4" />
-              {label}
+              <Icon className="h-5 w-5" />
             </Link>
           );
         })}
