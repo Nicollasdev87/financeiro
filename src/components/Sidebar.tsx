@@ -24,7 +24,7 @@ export function Sidebar() {
   const pathname = usePathname();
 
   return (
-    <aside className="sticky top-4 z-30 my-4 ml-4 hidden w-16 shrink-0 flex-col items-center gap-2 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#140F27] to-[#0F0B1D] py-4 shadow-xl shadow-black/30 md:flex">
+    <aside className="sticky top-4 z-30 my-4 ml-4 hidden w-16 shrink-0 self-start flex-col items-center gap-2 rounded-[28px] border border-white/10 bg-gradient-to-b from-[#140F27] to-[#0F0B1D] py-4 shadow-xl shadow-black/30 md:flex">
       <nav className="flex flex-col items-center gap-2">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);

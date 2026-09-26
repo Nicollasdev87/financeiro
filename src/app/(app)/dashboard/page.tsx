@@ -76,8 +76,8 @@ export default function DashboardPage() {
   if (loadingHousehold) return <p className="text-sm text-text-secondary">Carregando...</p>;
 
   return (
-    <div className="w-full rounded-3xl bg-gradient-to-br from-[#140F27] via-[#170F2C] to-[#0F0B1D] p-4 md:p-6">
-      <div className="mb-6 flex flex-col gap-1">
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-1">
         <h1 className="text-xl font-semibold capitalize text-white">{monthLabel(date)}</h1>
         <p className="text-sm text-white/50">Visão geral das finanças da família</p>
       </div>

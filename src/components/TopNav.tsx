@@ -23,7 +23,7 @@ export function TopNav() {
   const pathname = usePathname();
 
   return (
-    <div className="sticky top-4 z-30 hidden w-full flex-wrap items-center gap-2 px-4 pb-4 md:flex">
+    <div className="sticky top-4 z-30 hidden w-full flex-wrap items-center gap-2 px-4 py-4 md:flex">
       <div className="flex items-center gap-2 rounded-full border border-white/10 bg-gradient-to-b from-[#140F27] to-[#0F0B1D] px-4 py-2.5 shadow-lg shadow-black/30">
         <Wallet className="h-4 w-4 text-[#B7A3F5]" />
         <span className="text-sm font-semibold text-white">GrannaUp</span>
