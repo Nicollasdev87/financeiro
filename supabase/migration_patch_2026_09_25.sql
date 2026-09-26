@@ -40,38 +40,38 @@ create trigger trg_category_notes_updated before update on monthly_category_note
 --    (mesma monthly_expense_id + method + credit_card_id, geralmente com
 --    credit_card_id nulo) somando os valores em uma única linha e
 --    apagando as demais.
-with dups as (
+--    (usamos row_number() em vez de min(id)/max(id) porque o Postgres
+--    não tem uma função de agregação min/max nativa para o tipo uuid)
+with ranked as (
   select
+    id,
     monthly_expense_id,
-    method,
-    credit_card_id,
-    min(id) as keep_id,
-    sum(amount) as total_amount
+    row_number() over (
+      partition by monthly_expense_id, method, credit_card_id
+      order by id
+    ) as rn,
+    sum(amount) over (
+      partition by monthly_expense_id, method, credit_card_id
+    ) as total_amount
   from monthly_expense_payments
-  group by monthly_expense_id, method, credit_card_id
-  having count(*) > 1
 )
 update monthly_expense_payments p
-set amount = d.total_amount
-from dups d
-where p.id = d.keep_id;
+set amount = r.total_amount
+from ranked r
+where p.id = r.id and r.rn = 1;
 
-with dups as (
+with ranked as (
   select
-    monthly_expense_id,
-    method,
-    credit_card_id,
-    min(id) as keep_id
+    id,
+    row_number() over (
+      partition by monthly_expense_id, method, credit_card_id
+      order by id
+    ) as rn
   from monthly_expense_payments
-  group by monthly_expense_id, method, credit_card_id
-  having count(*) > 1
 )
 delete from monthly_expense_payments p
-using dups d
-where p.monthly_expense_id = d.monthly_expense_id
-  and p.method = d.method
-  and (p.credit_card_id = d.credit_card_id or (p.credit_card_id is null and d.credit_card_id is null))
-  and p.id <> d.keep_id;
+using ranked r
+where p.id = r.id and r.rn > 1;
 
 -- Recalcula o total de cada lançamento após a mesclagem acima
 update monthly_expenses me
