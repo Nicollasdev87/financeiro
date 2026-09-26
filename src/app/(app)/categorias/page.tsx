@@ -49,41 +49,56 @@ export default function CategoriasPage() {
     e.preventDefault();
     if (!householdId) return;
 
-    if (editing) {
-      await supabase
-        .from("categories")
-        .update({
+    const { error } = editing
+      ? await supabase
+          .from("categories")
+          .update({
+            name: form.name,
+            kind: form.kind,
+            nature: form.nature,
+            color: form.color,
+            description: form.description || null,
+          })
+          .eq("id", editing.id)
+      : await supabase.from("categories").insert({
+          household_id: householdId,
           name: form.name,
           kind: form.kind,
           nature: form.nature,
           color: form.color,
           description: form.description || null,
-        })
-        .eq("id", editing.id);
-    } else {
-      await supabase.from("categories").insert({
-        household_id: householdId,
-        name: form.name,
-        kind: form.kind,
-        nature: form.nature,
-        color: form.color,
-        description: form.description || null,
-        icon: "circle",
-        sort_order: categories.length,
-      });
+          icon: "circle",
+          sort_order: categories.length,
+        });
+
+    if (error) {
+      // Não deixa o erro passar em silêncio — se a coluna "description"
+      // ainda não estiver visível pro PostgREST (cache de schema
+      // desatualizado logo após rodar o ALTER TABLE), é aqui que aparece.
+      alert(`Não foi possível salvar a categoria: ${error.message}`);
+      return;
     }
+
     setOpen(false);
     reload();
   }
 
   async function toggleActive(cat: Category) {
-    await supabase.from("categories").update({ active: !cat.active }).eq("id", cat.id);
+    const { error } = await supabase.from("categories").update({ active: !cat.active }).eq("id", cat.id);
+    if (error) {
+      alert(`Não foi possível atualizar a categoria: ${error.message}`);
+      return;
+    }
     reload();
   }
 
   async function remove(cat: Category) {
     if (!confirm(`Excluir a categoria "${cat.name}"? Isso também remove os lançamentos associados.`)) return;
-    await supabase.from("categories").delete().eq("id", cat.id);
+    const { error } = await supabase.from("categories").delete().eq("id", cat.id);
+    if (error) {
+      alert(`Não foi possível excluir a categoria: ${error.message}`);
+      return;
+    }
     reload();
   }
 
@@ -102,9 +117,14 @@ export default function CategoriasPage() {
       .sort((a, b) => a.name.localeCompare(b.name, "pt-BR"));
     const ordered = [...fixed, ...variable];
 
-    await Promise.all(
+    const results = await Promise.all(
       ordered.map((cat, index) => supabase.from("categories").update({ sort_order: index }).eq("id", cat.id))
     );
+    const failed = results.find((r) => r.error);
+    if (failed?.error) {
+      alert(`Não foi possível reordenar as categorias: ${failed.error.message}`);
+      return;
+    }
     reload();
   }
 

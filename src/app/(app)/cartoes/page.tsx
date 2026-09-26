@@ -1,7 +1,7 @@
 "use client";
 
-import { useMemo, useState } from "react";
-import { Plus, CreditCard as CardIcon } from "lucide-react";
+import { useState } from "react";
+import { Plus, CreditCard as CardIcon, Pencil, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
 import { Input } from "@/components/ui/Input";
@@ -12,7 +12,10 @@ import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { useMonthData } from "@/lib/hooks/useMonthData";
 import { useMonthsSummary } from "@/lib/hooks/useMonthsSummary";
 import { createClient } from "@/lib/supabase/client";
+import type { CreditCard } from "@/lib/types";
 import { formatCurrency } from "@/lib/utils";
+
+const EMPTY_FORM = { name: "", bank: "", credit_limit: "", monthly_goal: "", closing_day: "1", due_day: "10" };
 
 export default function CartoesPage() {
   const [date] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
@@ -20,7 +23,8 @@ export default function CartoesPage() {
   const { expenses } = useMonthData(householdId, date);
   const { summaries } = useMonthsSummary(householdId, date, 2);
   const [open, setOpen] = useState(false);
-  const [form, setForm] = useState({ name: "", bank: "", credit_limit: "", monthly_goal: "", closing_day: "1", due_day: "10" });
+  const [editing, setEditing] = useState<CreditCard | null>(null);
+  const [form, setForm] = useState(EMPTY_FORM);
   const supabase = createClient();
 
   const currentMonthCredit = expenses.reduce(
@@ -30,20 +34,60 @@ export default function CartoesPage() {
   const previousMonthCredit = summaries[0]?.credit ?? 0;
   const diff = previousMonthCredit - currentMonthCredit;
 
-  async function handleCreate(e: React.FormEvent) {
+  function openNew() {
+    setEditing(null);
+    setForm(EMPTY_FORM);
+    setOpen(true);
+  }
+
+  function openEdit(card: CreditCard) {
+    setEditing(card);
+    setForm({
+      name: card.name,
+      bank: card.bank ?? "",
+      credit_limit: card.credit_limit ? String(card.credit_limit) : "",
+      monthly_goal: card.monthly_goal ? String(card.monthly_goal) : "",
+      closing_day: String(card.closing_day),
+      due_day: String(card.due_day),
+    });
+    setOpen(true);
+  }
+
+  async function handleSave(e: React.FormEvent) {
     e.preventDefault();
     if (!householdId) return;
-    await supabase.from("credit_cards").insert({
-      household_id: householdId,
+
+    const payload = {
       name: form.name,
       bank: form.bank || null,
       credit_limit: Number(form.credit_limit) || 0,
       monthly_goal: Number(form.monthly_goal) || 0,
       closing_day: Number(form.closing_day) || 1,
       due_day: Number(form.due_day) || 10,
-    });
+    };
+
+    const { error } = editing
+      ? await supabase.from("credit_cards").update(payload).eq("id", editing.id)
+      : await supabase.from("credit_cards").insert({ ...payload, household_id: householdId });
+
+    if (error) {
+      alert(`Não foi possível salvar o cartão: ${error.message}`);
+      return;
+    }
+
     setOpen(false);
-    setForm({ name: "", bank: "", credit_limit: "", monthly_goal: "", closing_day: "1", due_day: "10" });
+    setEditing(null);
+    setForm(EMPTY_FORM);
+    reload();
+  }
+
+  async function remove(card: CreditCard) {
+    if (!confirm(`Excluir o cartão "${card.name}"? Isso também remove os pagamentos associados a ele.`)) return;
+    const { error } = await supabase.from("credit_cards").delete().eq("id", card.id);
+    if (error) {
+      alert(`Não foi possível excluir o cartão: ${error.message}`);
+      return;
+    }
     reload();
   }
 
@@ -56,7 +100,7 @@ export default function CartoesPage() {
           <h1 className="text-xl font-semibold">Cartões</h1>
           <p className="text-sm text-text-secondary">Controle de limite e meta mensal</p>
         </div>
-        <Button onClick={() => setOpen(true)}>
+        <Button onClick={openNew}>
           <Plus className="h-4 w-4" /> Novo cartão
         </Button>
       </div>
@@ -66,7 +110,7 @@ export default function CartoesPage() {
           icon={<CardIcon className="h-8 w-8" />}
           title="Nenhum cartão cadastrado"
           description="Cadastre seus cartões para acompanhar limite, utilização e metas."
-          action={<Button onClick={() => setOpen(true)}>Cadastrar cartão</Button>}
+          action={<Button onClick={openNew}>Cadastrar cartão</Button>}
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -79,8 +123,26 @@ export default function CartoesPage() {
             return (
               <Card key={card.id}>
                 <div className="mb-3 flex items-center justify-between">
-                  <h3 className="font-semibold">{card.name}</h3>
-                  <span className="text-xs text-text-secondary">{card.bank}</span>
+                  <div>
+                    <h3 className="font-semibold">{card.name}</h3>
+                    {card.bank && <span className="text-xs text-text-secondary">{card.bank}</span>}
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={() => openEdit(card)}
+                      className="rounded-control p-1.5 hover:bg-black/5"
+                      title="Editar cartão"
+                    >
+                      <Pencil className="h-4 w-4 text-text-secondary" />
+                    </button>
+                    <button
+                      onClick={() => remove(card)}
+                      className="rounded-control p-1.5 hover:bg-black/5"
+                      title="Excluir cartão"
+                    >
+                      <Trash2 className="h-4 w-4 text-danger" />
+                    </button>
+                  </div>
                 </div>
 
                 <div className="mb-3 grid grid-cols-3 gap-2 text-center">
@@ -127,8 +189,15 @@ export default function CartoesPage() {
         </div>
       )}
 
-      <Modal open={open} onClose={() => setOpen(false)} title="Novo cartão">
-        <form onSubmit={handleCreate} className="flex flex-col gap-3">
+      <Modal
+        open={open}
+        onClose={() => {
+          setOpen(false);
+          setEditing(null);
+        }}
+        title={editing ? "Editar cartão" : "Novo cartão"}
+      >
+        <form onSubmit={handleSave} className="flex flex-col gap-3">
           <Input placeholder="Nome (ex: Nubank)" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
           <Input placeholder="Banco" value={form.bank} onChange={(e) => setForm({ ...form, bank: e.target.value })} />
           <Input placeholder="Limite" inputMode="decimal" value={form.credit_limit} onChange={(e) => setForm({ ...form, credit_limit: e.target.value })} />

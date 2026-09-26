@@ -86,3 +86,9 @@ set total = coalesce((
 create unique index if not exists monthly_expense_payments_null_card_uidx
   on monthly_expense_payments (monthly_expense_id, method)
   where credit_card_id is null;
+
+-- 5) Recarrega o cache de schema do PostgREST. Sem isso, a API pode
+-- continuar "sem enxergar" a coluna "description" recém-criada por um
+-- tempo, e o app falha ao salvá-la (esse é o motivo mais comum de uma
+-- coluna nova "não salvar" logo após rodar um ALTER TABLE manual).
+notify pgrst, 'reload schema';
