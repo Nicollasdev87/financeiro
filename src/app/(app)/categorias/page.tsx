@@ -11,8 +11,7 @@ import { Badge } from "@/components/ui/Badge";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { createClient } from "@/lib/supabase/client";
 import type { Category, CategoryKind, CategoryNature } from "@/lib/types";
-
-const COLORS = ["#2878F8", "#3F67BF", "#33B669", "#EED146", "#AB5646", "#184787", "#949491"];
+import { CATEGORY_COLORS as COLORS } from "@/lib/categoryColors";
 
 export default function CategoriasPage() {
   const { householdId, categories, reload, loading } = useHouseholdData();
@@ -192,7 +191,7 @@ export default function CategoriasPage() {
               </Select>
             )}
           </div>
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2">
             {COLORS.map((c) => (
               <button
                 key={c}

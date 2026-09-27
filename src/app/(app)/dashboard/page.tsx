@@ -103,9 +103,9 @@ export default function DashboardPage() {
         <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
           <StatChip label="Receitas" value={totalIncome} icon={ArrowUpCircle} tone="success" />
           <StatChip label="Despesas" value={totalExpenses} icon={ArrowDownCircle} tone="danger" />
+          <StatChip label="Investimentos" value={totalInvestment} icon={PiggyBank} tone="success" />
           <StatChip label="Saldo" value={balance} icon={Wallet2} tone="primary" />
           <StatChip label="Cartão" value={totalCredit} icon={CreditCard} tone="neutral" />
-          <StatChip label="Investimentos" value={totalInvestment} icon={PiggyBank} tone="success" />
         </div>
 
         {/* 2. Gastos por forma de pagamento (esquerda) + Receitas x Despesas (direita) */}
@@ -176,11 +176,11 @@ export default function DashboardPage() {
           <StackedBar data={byCategory} />
         </GlassCard>
 
-        {/* 4. Quem gastou (esquerda) + Investimentos mês a mês (direita) */}
+        {/* 4. Quem gastou (esquerda, mais estreito) + Investimentos mês a mês (direita, mais espaço) */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
-          <GlassCard className="lg:col-span-3">
+          <GlassCard className="lg:col-span-2">
             <h3 className="mb-4 font-medium text-text">Quem gastou?</h3>
-            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+            <div className="flex flex-col gap-3">
               {byPerson.map(({ member, income, expenses: exp }) => (
                 <div key={member.id} className="rounded-control border border-border bg-background-secondary p-4">
                   <div className="mb-3 flex items-center gap-2">
@@ -206,7 +206,7 @@ export default function DashboardPage() {
             </div>
           </GlassCard>
 
-          <GlassCard className="lg:col-span-2">
+          <GlassCard className="lg:col-span-3">
             <h3 className="mb-4 font-medium text-text">Investimentos</h3>
             {investmentData.every((d) => d.value === 0) ? (
               <p className="text-sm text-text-secondary">Nenhum aporte lançado neste período.</p>

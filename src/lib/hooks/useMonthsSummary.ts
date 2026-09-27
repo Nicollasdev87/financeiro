@@ -10,7 +10,9 @@ export interface MonthSummary {
   income: number;
   expenses: number;
   credit: number;
+  /** Só a parcela NÃO paga no cartão de categorias fixas — soma com `credit`+`variable` = `expenses`. */
   fixed: number;
+  /** Só a parcela NÃO paga no cartão de categorias variáveis — soma com `credit`+`fixed` = `expenses`. */
   variable: number;
   investment: number; // aportado naquele mês
   investmentAccumulated: number; // soma de todos os aportes até (e incluindo) aquele mês
@@ -68,15 +70,22 @@ export function useMonthsSummary(householdId: string | null, referenceDate: Date
 
       const expenses = expensesForMonth.reduce((s: number, e: any) => s + Number(e.total), 0);
       const income = incomeForMonth.reduce((s: number, i: any) => s + Number(i.amount), 0);
-      const credit = expensesForMonth.reduce(
-        (s: number, e: any) =>
-          s + (e.payments ?? []).filter((p: any) => p.method === "credit").reduce((s2: number, p: any) => s2 + Number(p.amount), 0),
-        0
-      );
+
+      // "Cartão", "Fixo" e "Variável" precisam ser mutuamente exclusivos
+      // (Cartão + Fixo + Variável = Despesas, sem sobrepor). Por isso a
+      // parcela paga no cartão é sempre descontada de Fixo/Variável — um
+      // gasto fixo pago no crédito entra só em "Cartão", não nos dois.
+      const creditPortion = (e: any) =>
+        (e.payments ?? []).filter((p: any) => p.method === "credit").reduce((s: number, p: any) => s + Number(p.amount), 0);
+      const nonCreditPortion = (e: any) => Number(e.total) - creditPortion(e);
+
+      const credit = expensesForMonth.reduce((s: number, e: any) => s + creditPortion(e), 0);
       const fixed = expensesForMonth
         .filter((e: any) => e.categories?.nature === "fixed")
-        .reduce((s: number, e: any) => s + Number(e.total), 0);
-      const variable = expenses - fixed;
+        .reduce((s: number, e: any) => s + nonCreditPortion(e), 0);
+      const variable = expensesForMonth
+        .filter((e: any) => e.categories?.nature === "variable")
+        .reduce((s: number, e: any) => s + nonCreditPortion(e), 0);
 
       const investment = (investmentRows ?? [])
         .filter((i: any) => i.month === key)

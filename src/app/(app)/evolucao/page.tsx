@@ -67,12 +67,14 @@ export default function EvolucaoPage() {
             <tr className="border-b border-border text-left text-text-secondary">
               <th className="py-2 font-medium">Mês</th>
               <th className="py-2 text-right font-medium">Receitas</th>
-              <th className="py-2 text-right font-medium">Despesas</th>
-              <th className="py-2 text-right font-medium">Cartão</th>
-              <th className="py-2 text-right font-medium">Fixos</th>
-              <th className="py-2 text-right font-medium">Variáveis</th>
-              <th className="py-2 text-right font-medium">Saldo</th>
               <th className="py-2 text-right font-medium">Investimentos</th>
+              <th className="py-2 text-right font-medium">Despesas</th>
+              <th className="py-2 pl-3 text-right font-medium border-l border-border" title="Cartão, Fixo e Variável são partes independentes das Despesas — juntas somam o total de Despesas, sem sobrepor.">
+                Cartão
+              </th>
+              <th className="py-2 text-right font-medium">Fixo</th>
+              <th className="py-2 pr-3 text-right font-medium border-r border-border">Variável</th>
+              <th className="py-2 text-right font-medium">Saldo</th>
             </tr>
           </thead>
           <tbody>
@@ -80,12 +82,12 @@ export default function EvolucaoPage() {
               <tr key={s.month} className="border-b border-border last:border-0">
                 <td className="py-2 capitalize">{monthLabelShort(s.date)}</td>
                 <td className="py-2 text-right tabular-nums text-success">{formatCurrency(s.income)}</td>
-                <td className="py-2 text-right tabular-nums text-danger">{formatCurrency(s.expenses)}</td>
-                <td className="py-2 text-right tabular-nums">{formatCurrency(s.credit)}</td>
-                <td className="py-2 text-right tabular-nums">{formatCurrency(s.fixed)}</td>
-                <td className="py-2 text-right tabular-nums">{formatCurrency(s.variable)}</td>
-                <td className="py-2 text-right tabular-nums font-medium">{formatCurrency(s.income - s.expenses)}</td>
                 <td className="py-2 text-right tabular-nums text-success">{formatCurrency(s.investment)}</td>
+                <td className="py-2 text-right tabular-nums text-danger">{formatCurrency(s.expenses)}</td>
+                <td className="py-2 pl-3 text-right tabular-nums border-l border-border">{formatCurrency(s.credit)}</td>
+                <td className="py-2 text-right tabular-nums">{formatCurrency(s.fixed)}</td>
+                <td className="py-2 pr-3 text-right tabular-nums border-r border-border">{formatCurrency(s.variable)}</td>
+                <td className="py-2 text-right tabular-nums font-medium">{formatCurrency(s.income - s.expenses)}</td>
               </tr>
             ))}
           </tbody>
