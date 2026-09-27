@@ -33,18 +33,31 @@ export async function middleware(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser();
 
-  const isAuthRoute = request.nextUrl.pathname.startsWith("/login");
+  const path = request.nextUrl.pathname;
 
-  if (!user && !isAuthRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/login";
-    return NextResponse.redirect(url);
-  }
+  // Rotas que só fazem sentido para quem NÃO está logado — usuário logado
+  // que cair aqui é mandado pro dashboard.
+  const publicOnlyRoutes = ["/login", "/cadastro", "/recuperar-senha"];
+  const isPublicOnly = publicOnlyRoutes.some((r) => path.startsWith(r));
 
-  if (user && isAuthRoute) {
-    const url = request.nextUrl.clone();
-    url.pathname = "/dashboard";
-    return NextResponse.redirect(url);
+  // Rotas que nunca forçam redirecionamento em nenhuma direção:
+  // - /auth/callback: troca o code da Supabase por sessão (roda sem sessão ainda).
+  // - /redefinir-senha: alcançada só depois do callback, quando o usuário já
+  //   está "logado" (sessão de recuperação) — bloquear isso quebraria o fluxo.
+  const isBypassed = path.startsWith("/auth") || path.startsWith("/redefinir-senha");
+
+  if (!isBypassed) {
+    if (!user && !isPublicOnly) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/login";
+      return NextResponse.redirect(url);
+    }
+
+    if (user && isPublicOnly) {
+      const url = request.nextUrl.clone();
+      url.pathname = "/dashboard";
+      return NextResponse.redirect(url);
+    }
   }
 
   return response;
