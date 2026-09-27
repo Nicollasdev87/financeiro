@@ -75,7 +75,7 @@ export function DonutChart({
         </div>
       </div>
 
-      <div className="grid max-h-[160px] w-full grid-cols-1 gap-x-4 gap-y-2 overflow-y-auto pr-1 sm:grid-cols-2">
+      <div className="grid max-h-[160px] w-full grid-cols-1 gap-y-2 overflow-y-auto pr-1">
         {slices.map((s, i) => (
           <div key={s.name} className="flex min-w-0 items-center justify-between gap-2 text-sm">
             <span className="flex min-w-0 items-center gap-2">

@@ -100,34 +100,15 @@ export default function DashboardPage() {
           <StatChip label="Cartão" value={totalCredit} icon={CreditCard} tone="neutral" />
         </div>
 
-        {/* 2. Quem gastou (esquerda) + Receitas x Despesas (direita) */}
+        {/* 2. Gastos por forma de pagamento (esquerda) + Receitas x Despesas (direita) */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
           <GlassCard className="lg:col-span-2">
-            <h3 className="mb-4 font-medium text-text">Quem gastou?</h3>
-            <div className="flex flex-col gap-3">
-              {byPerson.map(({ member, income, expenses: exp }) => (
-                <div key={member.id} className="rounded-control border border-border bg-background-secondary p-4">
-                  <div className="mb-3 flex items-center gap-2">
-                    <span
-                      className="h-2.5 w-2.5 rounded-full"
-                      style={{ backgroundColor: member.color ?? "#2878F8" }}
-                    />
-                    <span className="font-medium text-text">{member.display_name}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-tertiary">Receitas</span>
-                    <span className="tabular-nums text-success">{formatCurrency(income)}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-text-tertiary">Despesas</span>
-                    <span className="tabular-nums text-danger">{formatCurrency(exp)}</span>
-                  </div>
-                </div>
-              ))}
-              {byPerson.length === 0 && (
-                <p className="text-sm text-text-secondary">Nenhum integrante cadastrado ainda.</p>
-              )}
-            </div>
+            <h3 className="mb-4 font-medium text-text">Gastos por forma de pagamento</h3>
+            {byMethod.length === 0 ? (
+              <p className="text-sm text-text-secondary">Nenhum gasto lançado neste mês.</p>
+            ) : (
+              <DonutChart data={byMethod} maxSlices={6} />
+            )}
           </GlassCard>
 
           <GlassCard className="lg:col-span-3">
@@ -174,7 +155,7 @@ export default function DashboardPage() {
                   name="Despesas"
                   fill="rgb(var(--danger-rgb) / 1)"
                   stackId="a"
-                  radius={[0, 0, 6, 6]}
+                  radius={[6, 6, 0, 0]}
                 />
               </BarChart>
             </ResponsiveContainer>
@@ -187,14 +168,33 @@ export default function DashboardPage() {
           <StackedBar data={byCategory} />
         </GlassCard>
 
-        {/* 4. Gastos por forma de pagamento — segue como rosca */}
+        {/* 4. Quem gastou — full width */}
         <GlassCard>
-          <h3 className="mb-4 font-medium text-text">Gastos por forma de pagamento</h3>
-          {byMethod.length === 0 ? (
-            <p className="text-sm text-text-secondary">Nenhum gasto lançado neste mês.</p>
-          ) : (
-            <DonutChart data={byMethod} maxSlices={6} />
-          )}
+          <h3 className="mb-4 font-medium text-text">Quem gastou?</h3>
+          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {byPerson.map(({ member, income, expenses: exp }) => (
+              <div key={member.id} className="rounded-control border border-border bg-background-secondary p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <span
+                    className="h-2.5 w-2.5 rounded-full"
+                    style={{ backgroundColor: member.color ?? "#2878F8" }}
+                  />
+                  <span className="font-medium text-text">{member.display_name}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-tertiary">Receitas</span>
+                  <span className="tabular-nums text-success">{formatCurrency(income)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-text-tertiary">Despesas</span>
+                  <span className="tabular-nums text-danger">{formatCurrency(exp)}</span>
+                </div>
+              </div>
+            ))}
+            {byPerson.length === 0 && (
+              <p className="text-sm text-text-secondary">Nenhum integrante cadastrado ainda.</p>
+            )}
+          </div>
         </GlassCard>
       </div>
     </div>

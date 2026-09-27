@@ -57,7 +57,7 @@ export function CategoryShell({
   const [open, setOpen] = useState(defaultOpen);
 
   return (
-    <div className="rounded-card border border-border/70 bg-surface transition-shadow hover:shadow-card">
+    <div className="rounded-card border border-border bg-surface transition-shadow hover:shadow-card">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
@@ -86,7 +86,7 @@ export function CategoryShell({
         style={{ gridTemplateRows: open ? "1fr" : "0fr" }}
       >
         <div className="overflow-hidden">
-          <div className="flex flex-col gap-4 border-t border-border/70 px-4 pb-4 pt-3.5">
+          <div className="flex flex-col gap-4 border-t border-border px-4 pb-4 pt-3.5">
             {description && (
               <p className="text-xs leading-relaxed text-text-secondary">{description}</p>
             )}

@@ -52,7 +52,7 @@ export function CategoryRow({
                 <span className="text-xs font-medium text-text-secondary">{member.display_name}</span>
               </div>
             )}
-            <div className="grid grid-cols-2 divide-x divide-border/70 rounded-control bg-background sm:grid-cols-4">
+            <div className="grid grid-cols-2 divide-x divide-border rounded-control bg-background sm:grid-cols-4">
               {METHODS.map((method) => {
                 const payment = expense?.payments.find((p) => p.method === method);
                 return (

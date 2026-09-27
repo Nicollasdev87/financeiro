@@ -23,8 +23,8 @@ const config: Config = {
           muted: "var(--text-muted)",
         },
         border: {
-          DEFAULT: "var(--border-subtle)",
-          strong: "var(--border-default)",
+          DEFAULT: "rgb(var(--border-subtle-rgb) / <alpha-value>)",
+          strong: "rgb(var(--border-default-rgb) / <alpha-value>)",
         },
         // Azul — cor principal de ação/destaque
         primary: {
