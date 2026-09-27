@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useCurrentUser } from "@/lib/hooks/useCurrentUser";
 
 function initials(name: string) {
@@ -13,7 +14,10 @@ export function ProfileChip() {
   if (loading || !name) return null;
 
   return (
-    <div className="flex items-center gap-2 rounded-card border border-border bg-surface py-1.5 pl-1.5 pr-4">
+    <Link
+      href="/configuracoes"
+      className="flex items-center gap-2 rounded-card border border-border bg-surface py-1.5 pl-1.5 pr-4 transition-colors hover:bg-surface-secondary"
+    >
       {avatarUrl ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img src={avatarUrl} alt={name} className="h-8 w-8 rounded-full object-cover" />
@@ -23,6 +27,6 @@ export function ProfileChip() {
         </div>
       )}
       <span className="max-w-[120px] truncate text-sm font-medium text-text">{name}</span>
-    </div>
+    </Link>
   );
 }
