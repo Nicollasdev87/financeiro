@@ -12,6 +12,8 @@ export interface MonthSummary {
   credit: number;
   fixed: number;
   variable: number;
+  investment: number; // aportado naquele mês
+  investmentAccumulated: number; // soma de todos os aportes até (e incluindo) aquele mês
 }
 
 /** Busca um resumo agregado dos últimos `count` meses (incluindo o mês de referência). */
@@ -29,20 +31,35 @@ export function useMonthsSummary(householdId: string | null, referenceDate: Date
     const firstKey = monthKeys[0];
     const lastKey = monthKeys[monthKeys.length - 1];
 
-    const [{ data: expenseRows }, { data: incomeRows }] = await Promise.all([
-      supabase
-        .from("monthly_expenses")
-        .select("month, total, category_id, categories(nature), payments:monthly_expense_payments(method, amount)")
-        .eq("household_id", householdId)
-        .gte("month", firstKey)
-        .lte("month", lastKey),
-      supabase
-        .from("monthly_income")
-        .select("month, amount")
-        .eq("household_id", householdId)
-        .gte("month", firstKey)
-        .lte("month", lastKey),
-    ]);
+    const [{ data: expenseRows }, { data: incomeRows }, { data: investmentRows }, { data: investmentAllRows }] =
+      await Promise.all([
+        supabase
+          .from("monthly_expenses")
+          .select("month, total, category_id, categories(nature), payments:monthly_expense_payments(method, amount)")
+          .eq("household_id", householdId)
+          .gte("month", firstKey)
+          .lte("month", lastKey),
+        supabase
+          .from("monthly_income")
+          .select("month, amount")
+          .eq("household_id", householdId)
+          .gte("month", firstKey)
+          .lte("month", lastKey),
+        supabase
+          .from("monthly_investments")
+          .select("month, amount")
+          .eq("household_id", householdId)
+          .gte("month", firstKey)
+          .lte("month", lastKey),
+        // sem limite inferior: precisamos de TODOS os aportes até o último mês
+        // visível para calcular o acumulado corretamente, mesmo que o
+        // histórico de investimentos comece antes da janela exibida.
+        supabase
+          .from("monthly_investments")
+          .select("month, amount")
+          .eq("household_id", householdId)
+          .lte("month", lastKey),
+      ]);
 
     const result: MonthSummary[] = months.map((date) => {
       const key = toMonthKey(date);
@@ -61,7 +78,14 @@ export function useMonthsSummary(householdId: string | null, referenceDate: Date
         .reduce((s: number, e: any) => s + Number(e.total), 0);
       const variable = expenses - fixed;
 
-      return { month: key, date, income, expenses, credit, fixed, variable };
+      const investment = (investmentRows ?? [])
+        .filter((i: any) => i.month === key)
+        .reduce((s: number, i: any) => s + Number(i.amount), 0);
+      const investmentAccumulated = (investmentAllRows ?? [])
+        .filter((i: any) => i.month <= key)
+        .reduce((s: number, i: any) => s + Number(i.amount), 0);
+
+      return { month: key, date, income, expenses, credit, fixed, variable, investment, investmentAccumulated };
     });
 
     setSummaries(result);

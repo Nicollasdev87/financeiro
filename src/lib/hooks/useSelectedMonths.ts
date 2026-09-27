@@ -54,12 +54,14 @@ export interface MonthSummary {
   income: number;
   expenses: number;
   credit: number;
+  investment: number;
 }
 
 /**
- * Um resumo (receita/despesa/cartão) por mês, na mesma ordem de `monthKeys`
- * — alimenta o gráfico "Receitas x Despesas" com exatamente os meses que o
- * filtro do dashboard tem selecionados.
+ * Um resumo (receita/despesa/cartão/investimento) por mês, na mesma ordem
+ * de `monthKeys` — alimenta os gráficos "Receitas x Despesas" e
+ * "Investimentos" com exatamente os meses que o filtro do dashboard tem
+ * selecionados.
  */
 export function useSelectedMonthsSummaries(householdId: string | null, monthKeys: string[]) {
   const supabase = createClient();
@@ -75,21 +77,28 @@ export function useSelectedMonthsSummaries(householdId: string | null, monthKeys
     }
     setLoading(true);
 
-    const [{ data: expenseRows }, { data: incomeRows }] = await Promise.all([
+    const [{ data: expenseRows }, { data: incomeRows }, { data: investmentRows }] = await Promise.all([
       supabase
         .from("monthly_expenses")
         .select("month, total, payments:monthly_expense_payments(method, amount)")
         .eq("household_id", householdId)
         .in("month", monthKeys),
       supabase.from("monthly_income").select("month, amount").eq("household_id", householdId).in("month", monthKeys),
+      supabase
+        .from("monthly_investments")
+        .select("month, amount")
+        .eq("household_id", householdId)
+        .in("month", monthKeys),
     ]);
 
     const result = monthKeys.map((mKey) => {
       const expensesForMonth = (expenseRows ?? []).filter((e: any) => e.month === mKey);
       const incomeForMonth = (incomeRows ?? []).filter((i: any) => i.month === mKey);
+      const investmentForMonth = (investmentRows ?? []).filter((i: any) => i.month === mKey);
 
       const expenses = expensesForMonth.reduce((s: number, e: any) => s + Number(e.total), 0);
       const income = incomeForMonth.reduce((s: number, i: any) => s + Number(i.amount), 0);
+      const investment = investmentForMonth.reduce((s: number, i: any) => s + Number(i.amount), 0);
       const credit = expensesForMonth.reduce(
         (s: number, e: any) =>
           s +
@@ -99,7 +108,7 @@ export function useSelectedMonthsSummaries(householdId: string | null, monthKeys
         0
       );
 
-      return { month: mKey, date: fromMonthKey(mKey), income, expenses, credit };
+      return { month: mKey, date: fromMonthKey(mKey), income, expenses, credit, investment };
     });
 
     setSummaries(result);

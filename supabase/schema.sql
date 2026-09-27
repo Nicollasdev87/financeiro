@@ -54,7 +54,7 @@ create table if not exists categories (
   id uuid primary key default gen_random_uuid(),
   household_id uuid not null references households(id) on delete cascade,
   name text not null,
-  kind text not null check (kind in ('income', 'expense')),
+  kind text not null check (kind in ('income', 'expense', 'investment')),
   nature text not null default 'variable' check (nature in ('fixed', 'variable')),
   icon text not null default 'circle',
   color text not null default '#7C5CFC',
@@ -129,6 +129,22 @@ create table if not exists monthly_income (
 );
 
 -- ------------------------------------------------------------
+-- MONTHLY INVESTMENTS (mesmo formato de monthly_income, para
+-- categorias do tipo "investment": ações, fundos imobiliários etc.)
+-- ------------------------------------------------------------
+create table if not exists monthly_investments (
+  id uuid primary key default gen_random_uuid(),
+  household_id uuid not null references households(id) on delete cascade,
+  month date not null,
+  category_id uuid not null references categories(id) on delete cascade,
+  member_id uuid references household_members(id) on delete set null,
+  amount numeric(12,2) not null default 0,
+  created_at timestamptz not null default now(),
+  updated_at timestamptz not null default now(),
+  unique (household_id, month, category_id, member_id)
+);
+
+-- ------------------------------------------------------------
 -- MONTHLY CATEGORY NOTES (observações livres por categoria/mês)
 -- ------------------------------------------------------------
 create table if not exists monthly_category_notes (
@@ -157,6 +173,7 @@ create table if not exists financial_goals (
 -- índices
 create index if not exists idx_expenses_household_month on monthly_expenses(household_id, month);
 create index if not exists idx_income_household_month on monthly_income(household_id, month);
+create index if not exists idx_investments_household_month on monthly_investments(household_id, month);
 create index if not exists idx_payments_expense on monthly_expense_payments(monthly_expense_id);
 create index if not exists idx_categories_household on categories(household_id);
 
@@ -171,6 +188,7 @@ alter table credit_cards enable row level security;
 alter table monthly_expenses enable row level security;
 alter table monthly_expense_payments enable row level security;
 alter table monthly_income enable row level security;
+alter table monthly_investments enable row level security;
 alter table monthly_category_notes enable row level security;
 alter table financial_goals enable row level security;
 
@@ -213,6 +231,10 @@ create policy "expenses_all" on monthly_expenses
   with check (household_id in (select my_household_ids()));
 
 create policy "income_all" on monthly_income
+  for all using (household_id in (select my_household_ids()))
+  with check (household_id in (select my_household_ids()));
+
+create policy "investments_all" on monthly_investments
   for all using (household_id in (select my_household_ids()))
   with check (household_id in (select my_household_ids()));
 
@@ -274,6 +296,10 @@ create trigger trg_expenses_updated before update on monthly_expenses
 
 drop trigger if exists trg_income_updated on monthly_income;
 create trigger trg_income_updated before update on monthly_income
+  for each row execute procedure set_updated_at();
+
+drop trigger if exists trg_investments_updated on monthly_investments;
+create trigger trg_investments_updated before update on monthly_investments
   for each row execute procedure set_updated_at();
 
 drop trigger if exists trg_category_notes_updated on monthly_category_notes;

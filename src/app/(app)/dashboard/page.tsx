@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { ArrowDownCircle, ArrowUpCircle, CreditCard, Wallet2 } from "lucide-react";
+import { ArrowDownCircle, ArrowUpCircle, CreditCard, PiggyBank, Wallet2 } from "lucide-react";
 import {
   ResponsiveContainer,
   BarChart,
@@ -40,6 +40,7 @@ export default function DashboardPage() {
     (s, e) => s + e.payments.filter((p) => p.method === "credit").reduce((s2, p) => s2 + p.amount, 0),
     0
   );
+  const totalInvestment = summaries.reduce((s, m) => s + m.investment, 0);
   const balance = totalIncome - totalExpenses;
 
   const byCategory = useMemo(() => {
@@ -79,6 +80,12 @@ export default function DashboardPage() {
   }));
   const maxAbs = Math.max(1, ...divergingData.flatMap((d) => [Math.abs(d.income), Math.abs(d.expenses)]));
 
+  // Coluna verde de investimentos, mês a mês, para o card ao lado de "Quem gastou?".
+  const investmentData = summaries.map((s) => ({
+    label: monthLabelShort(s.date),
+    value: s.investment,
+  }));
+
   if (loadingHousehold) return <p className="text-sm text-text-secondary">Carregando...</p>;
 
   return (
@@ -93,11 +100,12 @@ export default function DashboardPage() {
 
       <div className="flex flex-col gap-4">
         {/* 1. Resumo rápido */}
-        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+        <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 md:grid-cols-5">
           <StatChip label="Receitas" value={totalIncome} icon={ArrowUpCircle} tone="success" />
           <StatChip label="Despesas" value={totalExpenses} icon={ArrowDownCircle} tone="danger" />
           <StatChip label="Saldo" value={balance} icon={Wallet2} tone="primary" />
           <StatChip label="Cartão" value={totalCredit} icon={CreditCard} tone="neutral" />
+          <StatChip label="Investimentos" value={totalInvestment} icon={PiggyBank} tone="success" />
         </div>
 
         {/* 2. Gastos por forma de pagamento (esquerda) + Receitas x Despesas (direita) */}
@@ -168,34 +176,74 @@ export default function DashboardPage() {
           <StackedBar data={byCategory} />
         </GlassCard>
 
-        {/* 4. Quem gastou — full width */}
-        <GlassCard>
-          <h3 className="mb-4 font-medium text-text">Quem gastou?</h3>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-3">
-            {byPerson.map(({ member, income, expenses: exp }) => (
-              <div key={member.id} className="rounded-control border border-border bg-background-secondary p-4">
-                <div className="mb-3 flex items-center gap-2">
-                  <span
-                    className="h-2.5 w-2.5 rounded-full"
-                    style={{ backgroundColor: member.color ?? "#2878F8" }}
+        {/* 4. Quem gastou (esquerda) + Investimentos mês a mês (direita) */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <GlassCard className="lg:col-span-3">
+            <h3 className="mb-4 font-medium text-text">Quem gastou?</h3>
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+              {byPerson.map(({ member, income, expenses: exp }) => (
+                <div key={member.id} className="rounded-control border border-border bg-background-secondary p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: member.color ?? "#2878F8" }}
+                    />
+                    <span className="font-medium text-text">{member.display_name}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-tertiary">Receitas</span>
+                    <span className="tabular-nums text-success">{formatCurrency(income)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-tertiary">Despesas</span>
+                    <span className="tabular-nums text-danger">{formatCurrency(exp)}</span>
+                  </div>
+                </div>
+              ))}
+              {byPerson.length === 0 && (
+                <p className="text-sm text-text-secondary">Nenhum integrante cadastrado ainda.</p>
+              )}
+            </div>
+          </GlassCard>
+
+          <GlassCard className="lg:col-span-2">
+            <h3 className="mb-4 font-medium text-text">Investimentos</h3>
+            {investmentData.every((d) => d.value === 0) ? (
+              <p className="text-sm text-text-secondary">Nenhum aporte lançado neste período.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={260}>
+                <BarChart data={investmentData}>
+                  <CartesianGrid vertical={false} stroke="var(--border-subtle)" />
+                  <XAxis
+                    dataKey="label"
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                    tick={{ fill: "var(--text-tertiary)" }}
                   />
-                  <span className="font-medium text-text">{member.display_name}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-tertiary">Receitas</span>
-                  <span className="tabular-nums text-success">{formatCurrency(income)}</span>
-                </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-text-tertiary">Despesas</span>
-                  <span className="tabular-nums text-danger">{formatCurrency(exp)}</span>
-                </div>
-              </div>
-            ))}
-            {byPerson.length === 0 && (
-              <p className="text-sm text-text-secondary">Nenhum integrante cadastrado ainda.</p>
+                  <YAxis
+                    tickLine={false}
+                    axisLine={false}
+                    fontSize={12}
+                    tick={{ fill: "var(--text-tertiary)" }}
+                    tickFormatter={(v) => formatCurrencyCompact(v)}
+                  />
+                  <Tooltip
+                    formatter={(v: number) => formatCurrency(v)}
+                    cursor={{ fill: "rgb(var(--success-rgb) / 0.08)" }}
+                    contentStyle={{
+                      background: "var(--surface-elevated)",
+                      border: "1px solid var(--border-default)",
+                      borderRadius: 10,
+                      color: "var(--text-primary)",
+                    }}
+                  />
+                  <Bar dataKey="value" name="Investimentos" fill="rgb(var(--success-rgb) / 1)" radius={[6, 6, 0, 0]} />
+                </BarChart>
+              </ResponsiveContainer>
             )}
-          </div>
-        </GlassCard>
+          </GlassCard>
+        </div>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 export type PaymentMethod = "pix" | "credit" | "debit" | "cash" | "boleto" | "other";
-export type CategoryKind = "income" | "expense";
+export type CategoryKind = "income" | "expense" | "investment";
 export type CategoryNature = "fixed" | "variable";
 
 export interface Member {
@@ -62,6 +62,15 @@ export interface MonthlyExpense {
 }
 
 export interface MonthlyIncome {
+  id: string;
+  household_id: string;
+  month: string;
+  category_id: string;
+  member_id: string | null;
+  amount: number;
+}
+
+export interface MonthlyInvestment {
   id: string;
   household_id: string;
   month: string;

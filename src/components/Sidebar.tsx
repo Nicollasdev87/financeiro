@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   LayoutDashboard,
   CalendarRange,
-  CreditCard,
+  PiggyBank,
   TrendingUp,
   Tags,
   Settings,
@@ -17,7 +17,7 @@ import { createClient } from "@/lib/supabase/client";
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/meu-mes", label: "Meu mês", icon: CalendarRange },
-  { href: "/cartoes", label: "Cartões", icon: CreditCard },
+  { href: "/investimentos", label: "Investimentos", icon: PiggyBank },
   { href: "/evolucao", label: "Evolução", icon: TrendingUp },
   { href: "/categorias", label: "Categorias", icon: Tags },
   { href: "/configuracoes", label: "Configurações", icon: Settings },

@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState } from "react";
-import { LayoutDashboard, CalendarRange, CreditCard, Plus, MoreHorizontal } from "lucide-react";
+import { LayoutDashboard, CalendarRange, PiggyBank, Plus, MoreHorizontal } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Modal } from "@/components/ui/Modal";
 import { Button } from "@/components/ui/Button";
@@ -54,14 +54,14 @@ export function BottomNav() {
         </button>
 
         <Link
-          href="/cartoes"
+          href="/investimentos"
           className={cn(
             "flex flex-1 flex-col items-center gap-1 py-1 text-xs",
-            pathname.startsWith("/cartoes") ? "text-primary" : "text-text-secondary"
+            pathname.startsWith("/investimentos") ? "text-primary" : "text-text-secondary"
           )}
         >
-          <CreditCard className="h-5 w-5" />
-          Cartões
+          <PiggyBank className="h-5 w-5" />
+          Investir
         </Link>
 
         <button

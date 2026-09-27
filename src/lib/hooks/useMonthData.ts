@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
-import type { CategoryNote, MonthlyExpense, MonthlyIncome, PaymentMethod } from "@/lib/types";
+import type { CategoryNote, MonthlyExpense, MonthlyIncome, MonthlyInvestment, PaymentMethod } from "@/lib/types";
 import { toMonthKey } from "@/lib/utils";
 
 export function useMonthData(householdId: string | null, date: Date) {
@@ -10,6 +10,7 @@ export function useMonthData(householdId: string | null, date: Date) {
   const [loading, setLoading] = useState(true);
   const [expenses, setExpenses] = useState<MonthlyExpense[]>([]);
   const [incomes, setIncomes] = useState<MonthlyIncome[]>([]);
+  const [investments, setInvestments] = useState<MonthlyInvestment[]>([]);
   const [notes, setNotes] = useState<CategoryNote[]>([]);
   const monthKey = toMonthKey(date);
 
@@ -17,26 +18,33 @@ export function useMonthData(householdId: string | null, date: Date) {
     if (!householdId) return;
     setLoading(true);
 
-    const [{ data: expenseRows }, { data: incomeRows }, { data: noteRows }] = await Promise.all([
-      supabase
-        .from("monthly_expenses")
-        .select("*, payments:monthly_expense_payments(*)")
-        .eq("household_id", householdId)
-        .eq("month", monthKey),
-      supabase
-        .from("monthly_income")
-        .select("*")
-        .eq("household_id", householdId)
-        .eq("month", monthKey),
-      supabase
-        .from("monthly_category_notes")
-        .select("*")
-        .eq("household_id", householdId)
-        .eq("month", monthKey),
-    ]);
+    const [{ data: expenseRows }, { data: incomeRows }, { data: investmentRows }, { data: noteRows }] =
+      await Promise.all([
+        supabase
+          .from("monthly_expenses")
+          .select("*, payments:monthly_expense_payments(*)")
+          .eq("household_id", householdId)
+          .eq("month", monthKey),
+        supabase
+          .from("monthly_income")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("month", monthKey),
+        supabase
+          .from("monthly_investments")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("month", monthKey),
+        supabase
+          .from("monthly_category_notes")
+          .select("*")
+          .eq("household_id", householdId)
+          .eq("month", monthKey),
+      ]);
 
     setExpenses((expenseRows as MonthlyExpense[]) ?? []);
     setIncomes(incomeRows ?? []);
+    setInvestments(investmentRows ?? []);
     setNotes(noteRows ?? []);
     setLoading(false);
   }, [supabase, householdId, monthKey]);
@@ -45,7 +53,7 @@ export function useMonthData(householdId: string | null, date: Date) {
     reload();
   }, [reload]);
 
-  return { loading, expenses, incomes, notes, reload, monthKey };
+  return { loading, expenses, incomes, investments, notes, reload, monthKey };
 }
 
 /** Cria (se preciso) a linha monthly_expenses para household+mes+categoria+membro e retorna o id. */
@@ -167,6 +175,27 @@ export async function setIncomeAmount(params: {
 }) {
   const supabase = createClient();
   await supabase.from("monthly_income").upsert(
+    {
+      household_id: params.householdId,
+      month: params.monthKey,
+      category_id: params.categoryId,
+      member_id: params.memberId,
+      amount: params.amount,
+    },
+    { onConflict: "household_id,month,category_id,member_id" }
+  );
+}
+
+/** Cria/edita o valor aportado numa categoria de investimento, num mês e pessoa. */
+export async function setInvestmentAmount(params: {
+  householdId: string;
+  monthKey: string;
+  categoryId: string;
+  memberId: string | null;
+  amount: number;
+}) {
+  const supabase = createClient();
+  await supabase.from("monthly_investments").upsert(
     {
       household_id: params.householdId,
       month: params.monthKey,

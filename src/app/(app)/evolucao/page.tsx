@@ -20,6 +20,7 @@ export default function EvolucaoPage() {
     Despesas: s.expenses,
     Saldo: s.income - s.expenses,
     Cartão: s.credit,
+    Investimentos: s.investment,
   }));
 
   return (
@@ -55,6 +56,7 @@ export default function EvolucaoPage() {
             <Line type="monotone" dataKey="Despesas" stroke="rgb(var(--danger-rgb) / 1)" strokeWidth={2} dot={false} />
             <Line type="monotone" dataKey="Saldo" stroke="#2878F8" strokeWidth={2} dot={false} />
             <Line type="monotone" dataKey="Cartão" stroke="rgb(var(--warning-rgb) / 1)" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="Investimentos" stroke="#7C5CFC" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </Card>
@@ -70,6 +72,7 @@ export default function EvolucaoPage() {
               <th className="py-2 text-right font-medium">Fixos</th>
               <th className="py-2 text-right font-medium">Variáveis</th>
               <th className="py-2 text-right font-medium">Saldo</th>
+              <th className="py-2 text-right font-medium">Investimentos</th>
             </tr>
           </thead>
           <tbody>
@@ -82,6 +85,7 @@ export default function EvolucaoPage() {
                 <td className="py-2 text-right tabular-nums">{formatCurrency(s.fixed)}</td>
                 <td className="py-2 text-right tabular-nums">{formatCurrency(s.variable)}</td>
                 <td className="py-2 text-right tabular-nums font-medium">{formatCurrency(s.income - s.expenses)}</td>
+                <td className="py-2 text-right tabular-nums text-success">{formatCurrency(s.investment)}</td>
               </tr>
             ))}
           </tbody>
@@ -95,12 +99,14 @@ export default function EvolucaoPage() {
           if (!last || last.income === 0) return <p className="text-sm text-text-secondary">Sem dados suficientes neste mês.</p>;
           const commitment = last.expenses / last.income;
           const creditShare = last.credit / last.income;
+          const investmentShare = last.investment / last.income;
           return (
-            <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+            <div className="grid grid-cols-2 gap-4 sm:grid-cols-5">
               <Metric label="Comprometimento da renda" value={`${Math.round(commitment * 100)}%`} />
               <Metric label="Gastos no cartão" value={`${Math.round(creditShare * 100)}%`} />
               <Metric label="Gastos fixos" value={formatCurrency(last.fixed)} />
               <Metric label="Gastos variáveis" value={formatCurrency(last.variable)} />
+              <Metric label="Investido da renda" value={`${Math.round(investmentShare * 100)}%`} />
             </div>
           );
         })()}

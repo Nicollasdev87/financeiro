@@ -49,13 +49,18 @@ export default function CategoriasPage() {
     e.preventDefault();
     if (!householdId) return;
 
+    // Categorias de investimento não usam a distinção fixo/variável —
+    // sempre gravamos "variable" pra satisfazer a constraint do banco,
+    // mas o seletor de natureza fica oculto no formulário para esse kind.
+    const nature = form.kind === "investment" ? "variable" : form.nature;
+
     const { error } = editing
       ? await supabase
           .from("categories")
           .update({
             name: form.name,
             kind: form.kind,
-            nature: form.nature,
+            nature,
             color: form.color,
             description: form.description || null,
           })
@@ -64,7 +69,7 @@ export default function CategoriasPage() {
           household_id: householdId,
           name: form.name,
           kind: form.kind,
-          nature: form.nature,
+          nature,
           color: form.color,
           description: form.description || null,
           icon: "circle",
@@ -132,6 +137,7 @@ export default function CategoriasPage() {
 
   const income = categories.filter((c) => c.kind === "income");
   const expense = categories.filter((c) => c.kind === "expense");
+  const investment = categories.filter((c) => c.kind === "investment");
 
   return (
     <div className="flex flex-col gap-6">
@@ -161,19 +167,30 @@ export default function CategoriasPage() {
         onDelete={remove}
         onSortAZ={() => sortAlphabetically("income")}
       />
+      <Section
+        title="Investimentos"
+        categories={investment}
+        onEdit={openEdit}
+        onToggle={toggleActive}
+        onDelete={remove}
+        onSortAZ={() => sortAlphabetically("investment")}
+      />
 
       <Modal open={open} onClose={() => setOpen(false)} title={editing ? "Editar categoria" : "Nova categoria"}>
         <form onSubmit={handleSave} className="flex flex-col gap-3">
           <Input placeholder="Nome" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required />
-          <div className="grid grid-cols-2 gap-3">
+          <div className={form.kind === "investment" ? "grid grid-cols-1" : "grid grid-cols-2 gap-3"}>
             <Select value={form.kind} onChange={(e) => setForm({ ...form, kind: e.target.value as CategoryKind })}>
               <option value="expense">Despesa</option>
               <option value="income">Receita</option>
+              <option value="investment">Investimento</option>
             </Select>
-            <Select value={form.nature} onChange={(e) => setForm({ ...form, nature: e.target.value as CategoryNature })}>
-              <option value="variable">Variável</option>
-              <option value="fixed">Fixo</option>
-            </Select>
+            {form.kind !== "investment" && (
+              <Select value={form.nature} onChange={(e) => setForm({ ...form, nature: e.target.value as CategoryNature })}>
+                <option value="variable">Variável</option>
+                <option value="fixed">Fixo</option>
+              </Select>
+            )}
           </div>
           <div className="flex gap-2">
             {COLORS.map((c) => (
@@ -244,7 +261,9 @@ function Section({
               <div className="flex items-center gap-2">
                 <span className="h-2.5 w-2.5 rounded-full" style={{ backgroundColor: cat.color }} />
                 <span className={cat.active ? "" : "text-text-secondary line-through"}>{cat.name}</span>
-                <Badge tone="neutral">{cat.nature === "fixed" ? "Fixo" : "Variável"}</Badge>
+                {cat.kind !== "investment" && (
+                  <Badge tone="neutral">{cat.nature === "fixed" ? "Fixo" : "Variável"}</Badge>
+                )}
                 {!cat.active && <Badge tone="warning">Inativa</Badge>}
               </div>
               <div className="flex items-center gap-1">
