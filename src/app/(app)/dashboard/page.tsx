@@ -11,98 +11,28 @@ import {
   Tooltip,
   CartesianGrid,
   Legend,
-  PieChart,
-  Pie,
-  Cell,
+  ReferenceLine,
 } from "recharts";
-import { Card } from "@/components/ui/Card";
-import { FinancialCard } from "@/components/FinancialCard";
+import { GlassCard } from "@/components/dashboard/GlassCard";
+import { StatChip } from "@/components/dashboard/StatChip";
+import { DonutChart } from "@/components/dashboard/DonutChart";
+import { StackedBar } from "@/components/dashboard/StackedBar";
+import { PeriodFilter, PeriodFilterValue, monthKeysFromPeriod } from "@/components/dashboard/PeriodFilter";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
-import { useMonthData } from "@/lib/hooks/useMonthData";
-import { useMonthsSummary } from "@/lib/hooks/useMonthsSummary";
-import { useTheme } from "@/lib/theme";
-import { CHART_COLORS, tooltipStyle } from "@/lib/chartColors";
+import { useSelectedMonthsData, useSelectedMonthsSummaries } from "@/lib/hooks/useSelectedMonths";
 import { PAYMENT_METHOD_LABELS, PaymentMethod } from "@/lib/types";
-import { formatCurrency, formatCurrencyCompact, monthLabel, monthLabelShort } from "@/lib/utils";
-
-const MAX_SLICES = 5;
-
-/** Agrupa em "top N + Outros" para o gráfico de rosca nunca quebrar, não importa quantas categorias existam. */
-function topNWithOthers(entries: { name: string; value: number }[], max = MAX_SLICES) {
-  const sorted = [...entries].sort((a, b) => b.value - a.value);
-  if (sorted.length <= max) return sorted;
-  const top = sorted.slice(0, max);
-  const othersTotal = sorted.slice(max).reduce((s, e) => s + e.value, 0);
-  if (othersTotal > 0) top.push({ name: "Outros", value: othersTotal });
-  return top;
-}
-
-function DonutCard({ title, data, colors, othersColor }: { title: string; data: { name: string; value: number }[]; colors: string[]; othersColor: string }) {
-  const grouped = useMemo(() => topNWithOthers(data), [data]);
-  const total = grouped.reduce((s, e) => s + e.value, 0);
-  const { theme } = useTheme();
-  const c = CHART_COLORS[theme];
-
-  function colorFor(name: string, index: number) {
-    if (name === "Outros") return othersColor;
-    return colors[index % colors.length];
-  }
-
-  return (
-    <Card>
-      <h3 className="mb-1 font-medium">{title}</h3>
-      {grouped.length === 0 ? (
-        <p className="py-16 text-center text-sm text-text-secondary">Nenhum gasto lançado neste mês.</p>
-      ) : (
-        <>
-          <div className="relative">
-            <ResponsiveContainer width="100%" height={220}>
-              <PieChart>
-                <Pie
-                  data={grouped}
-                  dataKey="value"
-                  nameKey="name"
-                  innerRadius={64}
-                  outerRadius={92}
-                  paddingAngle={grouped.length > 1 ? 3 : 0}
-                  cornerRadius={8}
-                  stroke="none"
-                >
-                  {grouped.map((entry, i) => (
-                    <Cell key={entry.name} fill={colorFor(entry.name, i)} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={tooltipStyle(c)} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="pointer-events-none absolute inset-0 flex flex-col items-center justify-center">
-              <span className="text-[11px] text-text-secondary">Total</span>
-              <span className="text-lg font-semibold tabular-nums">{formatCurrency(total)}</span>
-            </div>
-          </div>
-
-          {/* Legenda em flex-wrap: comporta qualquer quantidade de categorias sem quebrar o layout */}
-          <div className="mt-3 flex flex-wrap gap-x-4 gap-y-2">
-            {grouped.map((entry, i) => (
-              <div key={entry.name} className="flex items-center gap-1.5 text-xs text-text-secondary">
-                <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: colorFor(entry.name, i) }} />
-                <span className="truncate">{entry.name}</span>
-              </div>
-            ))}
-          </div>
-        </>
-      )}
-    </Card>
-  );
-}
+import { formatCurrency, formatCurrencyCompact, monthLabelShort } from "@/lib/utils";
 
 export default function DashboardPage() {
-  const [date] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [period, setPeriod] = useState<PeriodFilterValue>(() => ({
+    mode: "year",
+    year: new Date().getFullYear(),
+  }));
+  const monthKeys = useMemo(() => monthKeysFromPeriod(period), [period]);
+
   const { householdId, categories, members, loading: loadingHousehold } = useHouseholdData();
-  const { expenses, incomes } = useMonthData(householdId, date);
-  const { summaries } = useMonthsSummary(householdId, date, 6);
-  const { theme } = useTheme();
-  const c = CHART_COLORS[theme];
+  const { expenses, incomes } = useSelectedMonthsData(householdId, monthKeys);
+  const { summaries } = useSelectedMonthsSummaries(householdId, monthKeys);
 
   const totalIncome = incomes.reduce((s, i) => s + i.amount, 0);
   const totalExpenses = expenses.reduce((s, e) => s + e.total, 0);
@@ -115,7 +45,7 @@ export default function DashboardPage() {
   const byCategory = useMemo(() => {
     const map: Record<string, number> = {};
     for (const e of expenses) {
-      const cat = categories.find((cat) => cat.id === e.category_id);
+      const cat = categories.find((c) => c.id === e.category_id);
       if (!cat) continue;
       map[cat.name] = (map[cat.name] ?? 0) + e.total;
     }
@@ -138,87 +68,134 @@ export default function DashboardPage() {
     }));
   }, [members, incomes, expenses]);
 
-  const chartData = summaries.map((s) => ({ ...s, label: monthLabelShort(s.date) }));
-
-  // Paleta dos gráficos de rosca: azul de interação + verde/âmbar de apoio,
-  // seguindo "evitar múltiplas cores sem necessidade" do Design System.
-  const donutColors = [c.primary, c.success, c.warning, c.danger, c.primaryLine];
-  const othersColor = c.axisText;
+  // Colunas divergentes: receitas somam para cima a partir do zero, despesas
+  // (negativadas) somam para baixo — o mesmo stackId faz as duas "empilharem"
+  // a partir do eixo zero em vez de uma sobre a outra. Uma barra por mês
+  // selecionado no filtro (ou pelos 12 meses do ano, no modo "Ano atual").
+  const divergingData = summaries.map((s) => ({
+    label: monthLabelShort(s.date),
+    income: s.income,
+    expenses: -s.expenses,
+  }));
+  const maxAbs = Math.max(1, ...divergingData.flatMap((d) => [Math.abs(d.income), Math.abs(d.expenses)]));
 
   if (loadingHousehold) return <p className="text-sm text-text-secondary">Carregando...</p>;
 
   return (
-    <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold capitalize">{monthLabel(date)}</h1>
-        <p className="text-sm text-text-secondary">Visão geral das finanças da família</p>
+    <div className="flex flex-col gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 pl-5">
+        <div className="flex flex-col gap-1">
+          <h1 className="text-xl font-semibold text-text">Dashboard</h1>
+          <p className="text-sm text-text-secondary">Visão geral financeira.</p>
+        </div>
+        <PeriodFilter value={period} onChange={setPeriod} />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
-        <FinancialCard label="Receitas" value={totalIncome} icon={ArrowUpCircle} tone="success" />
-        <FinancialCard label="Despesas" value={totalExpenses} icon={ArrowDownCircle} tone="danger" />
-        <FinancialCard label="Saldo" value={balance} icon={Wallet2} tone="primary" />
-        <FinancialCard label="Cartão" value={totalCredit} icon={CreditCard} tone="neutral" />
-      </div>
+      <div className="flex flex-col gap-4">
+        {/* 1. Resumo rápido */}
+        <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
+          <StatChip label="Receitas" value={totalIncome} icon={ArrowUpCircle} tone="success" />
+          <StatChip label="Despesas" value={totalExpenses} icon={ArrowDownCircle} tone="danger" />
+          <StatChip label="Saldo" value={balance} icon={Wallet2} tone="primary" />
+          <StatChip label="Cartão" value={totalCredit} icon={CreditCard} tone="neutral" />
+        </div>
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        {/* 1) Quem gastou — primeiro card, da esquerda para direita */}
-        <Card>
-          <h3 className="mb-3 font-medium">Quem gastou?</h3>
-          <div className="flex flex-col">
-            {byPerson.map(({ member, income, expenses: exp }) => (
-              <div key={member.id} className="flex items-center justify-between border-b border-border py-3 last:border-0 last:pb-0">
-                <div className="flex min-w-0 items-center gap-3">
-                  <div
-                    className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xs font-semibold"
-                    style={{ backgroundColor: `${member.color}26`, color: member.color }}
-                  >
-                    {member.display_name.slice(0, 2).toUpperCase()}
+        {/* 2. Quem gastou (esquerda) + Receitas x Despesas (direita) */}
+        <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">
+          <GlassCard className="lg:col-span-2">
+            <h3 className="mb-4 font-medium text-text">Quem gastou?</h3>
+            <div className="flex flex-col gap-3">
+              {byPerson.map(({ member, income, expenses: exp }) => (
+                <div key={member.id} className="rounded-control border border-border bg-background-secondary p-4">
+                  <div className="mb-3 flex items-center gap-2">
+                    <span
+                      className="h-2.5 w-2.5 rounded-full"
+                      style={{ backgroundColor: member.color ?? "#2878F8" }}
+                    />
+                    <span className="font-medium text-text">{member.display_name}</span>
                   </div>
-                  <span className="truncate font-medium">{member.display_name}</span>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-tertiary">Receitas</span>
+                    <span className="tabular-nums text-success">{formatCurrency(income)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-text-tertiary">Despesas</span>
+                    <span className="tabular-nums text-danger">{formatCurrency(exp)}</span>
+                  </div>
                 </div>
-                <div className="flex shrink-0 items-center gap-4 text-right text-sm">
-                  <div>
-                    <p className="text-[11px] text-text-secondary">Receitas</p>
-                    <p className="tabular-nums font-medium text-success">{formatCurrency(income)}</p>
-                  </div>
-                  <div>
-                    <p className="text-[11px] text-text-secondary">Despesas</p>
-                    <p className="tabular-nums font-medium text-danger">{formatCurrency(exp)}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        </Card>
+              ))}
+              {byPerson.length === 0 && (
+                <p className="text-sm text-text-secondary">Nenhum integrante cadastrado ainda.</p>
+              )}
+            </div>
+          </GlassCard>
 
-        {/* 2) Receitas x Despesas */}
-        <Card>
-          <h3 className="mb-4 font-medium">Receitas x Despesas</h3>
-          <ResponsiveContainer width="100%" height={240}>
-            <BarChart data={chartData}>
-              <CartesianGrid vertical={false} stroke={c.grid} />
-              <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} tick={{ fill: c.axisText }} />
-              <YAxis
-                tickLine={false}
-                axisLine={false}
-                fontSize={12}
-                tick={{ fill: c.axisText }}
-                tickFormatter={(v) => formatCurrencyCompact(v)}
-              />
-              <Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={tooltipStyle(c)} cursor={{ fill: "rgba(128,128,128,0.08)" }} />
-              <Legend wrapperStyle={{ color: c.axisText, fontSize: 12 }} />
-              <Bar dataKey="income" name="Receitas" fill={c.success} radius={[6, 6, 0, 0]} />
-              <Bar dataKey="expenses" name="Despesas" fill={c.danger} radius={[6, 6, 0, 0]} />
-            </BarChart>
-          </ResponsiveContainer>
-        </Card>
-      </div>
+          <GlassCard className="lg:col-span-3">
+            <h3 className="mb-4 font-medium text-text">Receitas x Despesas</h3>
+            <ResponsiveContainer width="100%" height={260}>
+              <BarChart data={divergingData} stackOffset="sign">
+                <CartesianGrid vertical={false} stroke="var(--border-subtle)" />
+                <XAxis
+                  dataKey="label"
+                  tickLine={false}
+                  axisLine={false}
+                  fontSize={12}
+                  tick={{ fill: "var(--text-tertiary)" }}
+                />
+                <YAxis
+                  domain={[-maxAbs, maxAbs]}
+                  tickLine={false}
+                  axisLine={false}
+                  fontSize={12}
+                  tick={{ fill: "var(--text-tertiary)" }}
+                  tickFormatter={(v) => formatCurrencyCompact(Math.abs(v))}
+                />
+                <ReferenceLine y={0} stroke="var(--border-default)" />
+                <Tooltip
+                  formatter={(v: number) => formatCurrency(Math.abs(v))}
+                  cursor={{ fill: "rgb(var(--blue-active-rgb) / 0.12)" }}
+                  contentStyle={{
+                    background: "var(--surface-elevated)",
+                    border: "1px solid var(--border-default)",
+                    borderRadius: 10,
+                    color: "var(--text-primary)",
+                  }}
+                />
+                <Legend wrapperStyle={{ color: "var(--text-secondary)", fontSize: 12 }} />
+                <Bar
+                  dataKey="income"
+                  name="Receitas"
+                  fill="rgb(var(--success-rgb) / 1)"
+                  stackId="a"
+                  radius={[6, 6, 0, 0]}
+                />
+                <Bar
+                  dataKey="expenses"
+                  name="Despesas"
+                  fill="rgb(var(--danger-rgb) / 1)"
+                  stackId="a"
+                  radius={[0, 0, 6, 6]}
+                />
+              </BarChart>
+            </ResponsiveContainer>
+          </GlassCard>
+        </div>
 
-      {/* 3) e 4) Gráficos de rosca — agrupam em "top 5 + Outros" para nunca quebrar */}
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <DonutCard title="Gastos por categoria" data={byCategory} colors={donutColors} othersColor={othersColor} />
-        <DonutCard title="Gastos por forma de pagamento" data={byMethod} colors={donutColors} othersColor={othersColor} />
+        {/* 3. Gastos por categoria — barra empilhada, 100% da largura */}
+        <GlassCard>
+          <h3 className="mb-4 font-medium text-text">Gastos por categoria</h3>
+          <StackedBar data={byCategory} />
+        </GlassCard>
+
+        {/* 4. Gastos por forma de pagamento — segue como rosca */}
+        <GlassCard>
+          <h3 className="mb-4 font-medium text-text">Gastos por forma de pagamento</h3>
+          {byMethod.length === 0 ? (
+            <p className="text-sm text-text-secondary">Nenhum gasto lançado neste mês.</p>
+          ) : (
+            <DonutChart data={byMethod} maxSlices={6} />
+          )}
+        </GlassCard>
       </div>
     </div>
   );

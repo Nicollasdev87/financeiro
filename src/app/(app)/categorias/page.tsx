@@ -12,7 +12,7 @@ import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { createClient } from "@/lib/supabase/client";
 import type { Category, CategoryKind, CategoryNature } from "@/lib/types";
 
-const COLORS = ["#7C5CFC", "#3B82F6", "#22A06B", "#D99A00", "#D64545", "#5B3FD4", "#6B7280"];
+const COLORS = ["#2878F8", "#3F67BF", "#33B669", "#EED146", "#AB5646", "#184787", "#949491"];
 
 export default function CategoriasPage() {
   const { householdId, categories, reload, loading } = useHouseholdData();
@@ -227,7 +227,7 @@ function Section({
         {categories.length > 1 && (
           <button
             onClick={onSortAZ}
-            className="flex items-center gap-1.5 rounded-control px-2 py-1 text-xs text-text-secondary hover:bg-overlay/5"
+            className="flex items-center gap-1.5 rounded-control px-2 py-1 text-xs text-text-secondary hover:bg-surface-secondary"
             title="Ordenar categorias de A a Z (Fixas primeiro, depois Variáveis)"
           >
             <ArrowDownAZ className="h-3.5 w-3.5" />
@@ -248,13 +248,13 @@ function Section({
                 {!cat.active && <Badge tone="warning">Inativa</Badge>}
               </div>
               <div className="flex items-center gap-1">
-                <button onClick={() => onToggle(cat)} className="rounded-control px-2 py-1 text-xs text-text-secondary hover:bg-overlay/5">
+                <button onClick={() => onToggle(cat)} className="rounded-control px-2 py-1 text-xs text-text-secondary hover:bg-surface-secondary">
                   {cat.active ? "Desativar" : "Ativar"}
                 </button>
-                <button onClick={() => onEdit(cat)} className="rounded-control p-1.5 hover:bg-overlay/5">
+                <button onClick={() => onEdit(cat)} className="rounded-control p-1.5 hover:bg-surface-secondary">
                   <Pencil className="h-4 w-4 text-text-secondary" />
                 </button>
-                <button onClick={() => onDelete(cat)} className="rounded-control p-1.5 hover:bg-overlay/5">
+                <button onClick={() => onDelete(cat)} className="rounded-control p-1.5 hover:bg-surface-secondary">
                   <Trash2 className="h-4 w-4 text-danger" />
                 </button>
               </div>

@@ -56,21 +56,21 @@ export function PeriodFilter({
     <div ref={ref} className="relative">
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex items-center gap-2 rounded-full border border-white/10 bg-white/[0.06] px-4 py-2.5 text-sm font-medium text-white shadow-lg shadow-black/20 transition-colors hover:bg-white/[0.09]"
+        className="flex items-center gap-2 rounded-card border border-border bg-surface px-4 py-2.5 text-sm font-medium text-text transition-colors hover:bg-surface-elevated"
       >
-        <Calendar className="h-4 w-4 text-[#B7A3F5]" />
+        <Calendar className="h-4 w-4 text-primary" />
         {periodLabel(value)}
-        <ChevronDown className={cn("h-4 w-4 text-white/50 transition-transform", open && "rotate-180")} />
+        <ChevronDown className={cn("h-4 w-4 text-text-tertiary transition-transform", open && "rotate-180")} />
       </button>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-2xl border border-white/10 bg-[#160F2C] p-3 shadow-2xl shadow-black/50">
-          <div className="mb-3 flex gap-1.5 rounded-xl bg-white/[0.05] p-1">
+        <div className="absolute right-0 top-full z-50 mt-2 w-72 rounded-card border border-border bg-surface-elevated p-3 shadow-card">
+          <div className="mb-3 flex gap-1.5 rounded-control bg-background-secondary p-1">
             <button
               onClick={() => onChange({ mode: "year", year: value.year })}
               className={cn(
-                "flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                value.mode === "year" ? "bg-gradient-to-br from-[#8D6CE6] to-[#5B3FD4] text-white" : "text-white/55 hover:text-white/85"
+                "flex-1 rounded-control px-3 py-1.5 text-sm font-medium transition-colors",
+                value.mode === "year" ? "bg-primary text-white" : "text-text-secondary hover:text-text"
               )}
             >
               Ano atual
@@ -84,8 +84,8 @@ export function PeriodFilter({
                 )
               }
               className={cn(
-                "flex-1 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors",
-                value.mode === "months" ? "bg-gradient-to-br from-[#8D6CE6] to-[#5B3FD4] text-white" : "text-white/55 hover:text-white/85"
+                "flex-1 rounded-control px-3 py-1.5 text-sm font-medium transition-colors",
+                value.mode === "months" ? "bg-primary text-white" : "text-text-secondary hover:text-text"
               )}
             >
               Mensal
@@ -93,7 +93,7 @@ export function PeriodFilter({
           </div>
 
           {value.mode === "year" ? (
-            <p className="px-1 py-2 text-xs text-white/50">Considera todos os meses de {value.year}.</p>
+            <p className="px-1 py-2 text-xs text-text-tertiary">Considera todos os meses de {value.year}.</p>
           ) : (
             <div className="grid grid-cols-3 gap-1.5">
               {MONTH_SHORT_NAMES.map((name, i) => {
@@ -103,10 +103,10 @@ export function PeriodFilter({
                     key={name}
                     onClick={() => toggleMonth(i)}
                     className={cn(
-                      "rounded-lg px-2 py-1.5 text-xs font-medium transition-colors",
+                      "rounded-control px-2 py-1.5 text-xs font-medium transition-colors",
                       active
-                        ? "bg-gradient-to-br from-[#8D6CE6] to-[#5B3FD4] text-white"
-                        : "bg-white/[0.05] text-white/60 hover:text-white/85"
+                        ? "bg-primary text-white"
+                        : "bg-background-secondary text-text-secondary hover:text-text"
                     )}
                   >
                     {name}

@@ -2,88 +2,72 @@
 @tailwind components;
 @tailwind utilities;
 
-/*
- * Design tokens centralizados (light + dark mode).
- * Cada variável é um triplet "R G B" (sem vírgulas) para funcionar com o
- * padrão do Tailwind `rgb(var(--x) / <alpha-value>)`, que permite usar
- * opacidade (ex: bg-primary/10) mesmo com a cor vindo de uma CSS variable.
- *
- * Trocar de tema é só alternar o atributo data-theme na tag <html>
- * (ver ThemeProvider) — todos os componentes que usam as classes de cor
- * (bg-, text-, border-) já reagem automaticamente, sem precisar editar
- * cada componente individualmente.
- */
 :root {
   --font-inter: "Inter", system-ui, sans-serif;
 
-  /* ---------- LIGHT MODE (padrão/atual) ---------- */
-  --color-bg: 248 249 252;
-  --color-bg-secondary: 241 242 246;
+  /* ===== Dark (padrão) ===== */
+  --bg-primary: #101010;
+  --bg-secondary: #1A1C1A;
 
-  --color-surface: 255 255 255;
-  --color-surface-secondary: 248 249 252;
-  --color-surface-elevated: 255 255 255;
+  --surface-primary: #2D2D2D;
+  --surface-secondary: #303030;
+  --surface-elevated: #282827;
 
-  --color-border: 229 231 235;
-  --color-border-strong: 209 213 219;
+  --border-subtle: #3A3A3A;
+  --border-default: #4F4F4F;
 
-  --color-text: 23 23 26;
-  --color-text-secondary: 107 114 128;
-  --color-text-tertiary: 130 130 135;
-  --color-text-muted: 156 163 175;
+  --text-primary: #FBFCFC;
+  --text-secondary: #C3C3C3;
+  --text-tertiary: #949491;
+  --text-muted: #6A6A6A;
 
-  --color-primary: 124 92 252;
-  --color-primary-hover: 91 63 212;
-  --color-primary-light: 241 237 255;
-  --color-primary-contrast: 91 63 212;
+  --blue-primary-rgb: 63 103 191;   /* #3F67BF */
+  --blue-active-rgb: 40 120 248;    /* #2878F8 */
+  --blue-light-rgb: 61 126 223;     /* #3D7EDF */
+  --blue-dark-rgb: 24 71 135;       /* #184787 */
 
-  --color-success: 34 160 107;
-  --color-success-light: 34 160 107;
-  --color-success-dark: 231 246 239;
+  --success-rgb: 51 182 105;        /* #33B669 */
+  --success-light-rgb: 101 183 130; /* #65B782 */
+  --success-dark: #153E26;
 
-  --color-danger: 214 69 69;
-  --color-warning: 217 154 0;
-  --color-info: 59 130 246;
-
-  --color-overlay: 0 0 0;
+  --danger-rgb: 171 86 70;          /* #AB5646 */
+  --warning-rgb: 238 209 70;        /* #EED146 */
 }
 
-/* ---------- DARK MODE ---------- */
-[data-theme="dark"] {
-  --color-bg: 16 16 16;           /* #101010 — preto sofisticado, nunca #000 puro */
-  --color-bg-secondary: 26 28 26; /* #1A1C1A */
+/* ===== Light ===== */
+[data-theme="light"] {
+  --bg-primary: #F4F5F7;
+  --bg-secondary: #FFFFFF;
 
-  --color-surface: 45 45 45;            /* #2D2D2D */
-  --color-surface-secondary: 48 48 48;  /* #303030 */
-  --color-surface-elevated: 40 40 39;   /* #282827 */
+  --surface-primary: #FFFFFF;
+  --surface-secondary: #F1F2F4;
+  --surface-elevated: #FFFFFF;
 
-  --color-border: 58 58 58;      /* #3A3A3A */
-  --color-border-strong: 79 79 79; /* #4F4F4F */
+  --border-subtle: #E3E5E8;
+  --border-default: #D2D4D9;
 
-  --color-text: 251 252 252;      /* #FBFCFC */
-  --color-text-secondary: 195 195 195; /* #C3C3C3 */
-  --color-text-tertiary: 148 148 145;  /* #949491 */
-  --color-text-muted: 106 106 106;     /* #6A6A6A */
+  --text-primary: #14161A;
+  --text-secondary: #4B4F58;
+  --text-tertiary: #6E7280;
+  --text-muted: #9A9DA6;
 
-  --color-primary: 40 120 248;         /* #2878F8 — blue-active */
-  --color-primary-hover: 24 71 135;    /* #184787 — blue-dark */
-  --color-primary-light: 24 71 135;    /* #184787 — fundo tint dos badges/itens ativos */
-  --color-primary-contrast: 134 169 231; /* #86A9E7 — texto legível sobre o tint acima */
+  --blue-primary-rgb: 63 103 191;
+  --blue-active-rgb: 40 120 248;
+  --blue-light-rgb: 61 126 223;
+  --blue-dark-rgb: 24 71 135;
 
-  --color-success: 51 182 105;      /* #33B669 */
-  --color-success-light: 101 183 130; /* #65B782 */
-  --color-success-dark: 21 62 38;     /* #153E26 */
+  --success-rgb: 30 154 82;
+  --success-light-rgb: 47 174 104;
+  --success-dark: #E4F6EC;
 
-  --color-danger: 171 86 70;   /* #AB5646 — discreto, não saturado */
-  --color-warning: 238 209 70; /* #EED146 */
-  --color-info: 61 126 223;    /* #3D7EDF */
-
-  --color-overlay: 255 255 255;
+  --danger-rgb: 193 70 47;
+  --warning-rgb: 201 154 0;
 }
 
 body {
-  background-color: rgb(var(--color-bg));
-  color: rgb(var(--color-text));
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  transition: background-color 0.15s ease, color 0.15s ease;
 }
 
 ::-webkit-scrollbar {
@@ -91,7 +75,7 @@ body {
   height: 8px;
 }
 ::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--color-border));
+  background-color: var(--border-default);
   border-radius: 999px;
 }
 

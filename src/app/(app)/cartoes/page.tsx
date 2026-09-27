@@ -130,14 +130,14 @@ export default function CartoesPage() {
                   <div className="flex items-center gap-1">
                     <button
                       onClick={() => openEdit(card)}
-                      className="rounded-control p-1.5 hover:bg-overlay/5"
+                      className="rounded-control p-1.5 hover:bg-surface-secondary"
                       title="Editar cartão"
                     >
                       <Pencil className="h-4 w-4 text-text-secondary" />
                     </button>
                     <button
                       onClick={() => remove(card)}
-                      className="rounded-control p-1.5 hover:bg-overlay/5"
+                      className="rounded-control p-1.5 hover:bg-surface-secondary"
                       title="Excluir cartão"
                     >
                       <Trash2 className="h-4 w-4 text-danger" />
@@ -165,7 +165,7 @@ export default function CartoesPage() {
 
                 {card.monthly_goal > 0 && (
                   <div className="mt-4 rounded-control bg-primary-light p-3">
-                    <p className="text-sm font-medium text-primary-contrast">
+                    <p className="text-sm font-medium text-white">
                       Meta do mês: {formatCurrency(card.monthly_goal)}
                     </p>
                     <ProgressBar value={used} max={card.monthly_goal} className="mt-2" />

@@ -11,7 +11,7 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { createClient } from "@/lib/supabase/client";
 
-const MEMBER_COLORS = ["#7C5CFC", "#3B82F6", "#22A06B", "#D99A00"];
+const MEMBER_COLORS = ["#2878F8", "#3F67BF", "#33B669", "#EED146"];
 
 export default function ConfiguracoesPage() {
   const router = useRouter();

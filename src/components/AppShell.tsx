@@ -6,7 +6,7 @@ import { BottomNav } from "@/components/BottomNav";
 
 export function AppShell({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen bg-[#0B0817]">
+    <div className="min-h-screen bg-background">
       <Sidebar />
       {/* pl matches the fixed rail's width + gap so this column never sits
           under it; pr keeps the same breathing room on the other side. */}

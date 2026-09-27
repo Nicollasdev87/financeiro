@@ -5,16 +5,12 @@ import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianG
 import { Card } from "@/components/ui/Card";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { useMonthsSummary } from "@/lib/hooks/useMonthsSummary";
-import { useTheme } from "@/lib/theme";
-import { CHART_COLORS, tooltipStyle } from "@/lib/chartColors";
 import { formatCurrency, formatCurrencyCompact, monthLabelShort } from "@/lib/utils";
 
 export default function EvolucaoPage() {
   const [date] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const { householdId, loading } = useHouseholdData();
   const { summaries } = useMonthsSummary(householdId, date, 6);
-  const { theme } = useTheme();
-  const c = CHART_COLORS[theme];
 
   if (loading) return <p className="text-sm text-text-secondary">Carregando...</p>;
 
@@ -36,21 +32,29 @@ export default function EvolucaoPage() {
       <Card>
         <ResponsiveContainer width="100%" height={280}>
           <LineChart data={chartData}>
-            <CartesianGrid vertical={false} stroke={c.grid} />
-            <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} tick={{ fill: c.axisText }} />
+            <CartesianGrid vertical={false} stroke="var(--border-subtle)" />
+            <XAxis dataKey="label" tickLine={false} axisLine={false} fontSize={12} tick={{ fill: "var(--text-tertiary)" }} />
             <YAxis
               tickLine={false}
               axisLine={false}
               fontSize={12}
-              tick={{ fill: c.axisText }}
+              tick={{ fill: "var(--text-tertiary)" }}
               tickFormatter={(v) => formatCurrencyCompact(v)}
             />
-            <Tooltip formatter={(v: number) => formatCurrency(v)} contentStyle={tooltipStyle(c)} />
-            <Legend wrapperStyle={{ color: c.axisText, fontSize: 12 }} />
-            <Line type="monotone" dataKey="Receitas" stroke={c.success} strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="Despesas" stroke={c.danger} strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="Saldo" stroke={c.primaryLine} strokeWidth={2} dot={false} />
-            <Line type="monotone" dataKey="Cartão" stroke={c.warning} strokeWidth={2} dot={false} />
+            <Tooltip
+              formatter={(v: number) => formatCurrency(v)}
+              contentStyle={{
+                background: "var(--surface-elevated)",
+                border: "1px solid var(--border-default)",
+                borderRadius: 10,
+                color: "var(--text-primary)",
+              }}
+            />
+            <Legend wrapperStyle={{ color: "var(--text-secondary)", fontSize: 12 }} />
+            <Line type="monotone" dataKey="Receitas" stroke="rgb(var(--success-rgb) / 1)" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="Despesas" stroke="rgb(var(--danger-rgb) / 1)" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="Saldo" stroke="#2878F8" strokeWidth={2} dot={false} />
+            <Line type="monotone" dataKey="Cartão" stroke="rgb(var(--warning-rgb) / 1)" strokeWidth={2} dot={false} />
           </LineChart>
         </ResponsiveContainer>
       </Card>

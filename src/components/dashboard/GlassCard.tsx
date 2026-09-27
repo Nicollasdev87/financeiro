@@ -2,17 +2,14 @@ import { HTMLAttributes } from "react";
 import { cn } from "@/lib/utils";
 
 /**
- * Dark, glass-style card used only on the dashboard for now. The rest of the
- * app keeps the original light `Card` component — this is intentionally a
- * separate component so nothing else changes.
+ * Card do dashboard. Usa os mesmos tokens do resto do app (bg-surface,
+ * border-border) — mantido como componente próprio só porque o dashboard
+ * usa esse nome em vários lugares, mas visualmente é igual ao `Card` base.
  */
 export function GlassCard({ className, ...props }: HTMLAttributes<HTMLDivElement>) {
   return (
     <div
-      className={cn(
-        "rounded-3xl border border-white/[0.09] bg-white/[0.065] p-5 shadow-[0_1px_2px_rgba(0,0,0,0.2)] backdrop-blur-sm",
-        className
-      )}
+      className={cn("rounded-card border border-border bg-surface p-5 shadow-card", className)}
       {...props}
     />
   );

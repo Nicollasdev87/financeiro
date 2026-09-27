@@ -1,13 +1,11 @@
 import type { Metadata, Viewport } from "next";
 import { Inter } from "next/font/google";
-import Script from "next/script";
-import { ThemeProvider } from "@/components/ThemeProvider";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
 
 export const metadata: Metadata = {
-  title: "Organizador Financeiro",
+  title: "GrannaUp",
   description: "Organização financeira simples para o casal.",
   manifest: "/manifest.json",
 };
@@ -15,28 +13,25 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: "#7C5CFC",
+  themeColor: "#101010",
 };
 
-// Aplica o tema salvo ANTES do React montar, pra não piscar o tema errado
-// (ex: abrir em dark mode e ver um flash de light mode por uma fração de
-// segundo). Roda como script bloqueante no <head>, antes de qualquer pintura.
-const THEME_INIT_SCRIPT = `
+// Aplica o tema salvo antes da primeira pintura, pra não piscar
+// claro->escuro (ou vice-versa) ao carregar a página.
+const noFlashThemeScript = `
 try {
-  var t = localStorage.getItem('theme');
-  if (t === 'dark') document.documentElement.setAttribute('data-theme', 'dark');
+  var t = localStorage.getItem('theme') || 'dark';
+  document.documentElement.setAttribute('data-theme', t);
 } catch (e) {}
 `;
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="pt-BR" suppressHydrationWarning>
-      <body className={`${inter.variable} font-sans antialiased`}>
-        <Script id="theme-init" strategy="beforeInteractive">
-          {THEME_INIT_SCRIPT}
-        </Script>
-        <ThemeProvider>{children}</ThemeProvider>
-      </body>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: noFlashThemeScript }} />
+      </head>
+      <body className={`${inter.variable} font-sans antialiased`}>{children}</body>
     </html>
   );
 }

@@ -17,7 +17,7 @@ export function MonthSelector({
       <button
         onClick={onPrev}
         aria-label="Mês anterior"
-        className="flex h-9 w-9 items-center justify-center rounded-control border border-border bg-surface hover:bg-overlay/5"
+        className="flex h-9 w-9 items-center justify-center rounded-control border border-border bg-surface hover:bg-surface-secondary"
       >
         <ChevronLeft className="h-4 w-4" />
       </button>
@@ -27,7 +27,7 @@ export function MonthSelector({
       <button
         onClick={onNext}
         aria-label="Próximo mês"
-        className="flex h-9 w-9 items-center justify-center rounded-control border border-border bg-surface hover:bg-overlay/5"
+        className="flex h-9 w-9 items-center justify-center rounded-control border border-border bg-surface hover:bg-surface-secondary"
       >
         <ChevronRight className="h-4 w-4" />
       </button>
