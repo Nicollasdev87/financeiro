@@ -15,7 +15,7 @@ export function ProfileChip() {
 
   return (
     <Link
-      href="/configuracoes"
+      href="/perfil"
       className="flex items-center gap-2 rounded-card border border-border bg-surface py-1.5 pl-1.5 pr-4 transition-colors hover:bg-surface-secondary"
     >
       {avatarUrl ? (

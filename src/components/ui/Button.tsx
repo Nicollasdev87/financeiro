@@ -10,7 +10,8 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variants = {
   primary: "bg-primary text-white hover:bg-primary-dark",
-  secondary: "bg-primary-light text-white hover:bg-primary-light/70",
+  // mesmo bug do Badge: texto branco sobre azul quase transparente ficava ilegível no tema claro
+  secondary: "bg-primary/10 text-primary hover:bg-primary/20",
   ghost: "bg-transparent text-text hover:bg-surface-secondary",
   danger: "bg-danger/10 text-danger hover:bg-danger/20",
 };

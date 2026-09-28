@@ -5,7 +5,7 @@ export type CategoryNature = "fixed" | "variable";
 export interface Member {
   id: string;
   household_id: string;
-  profile_id: string;
+  profile_id: string | null;
   display_name: string;
   color: string;
 }
@@ -87,3 +87,23 @@ export const PAYMENT_METHOD_LABELS: Record<PaymentMethod, string> = {
   boleto: "Boleto",
   other: "Outros",
 };
+
+/** Convite RECEBIDO pelo usuário logado (retorno da função my_pending_invitations). */
+export interface PendingInvitation {
+  id: string;
+  inviter_name: string;
+  household_name: string;
+  created_at: string;
+}
+
+/** Convite ENVIADO pelo planejamento (retorno da função my_household_invitations). */
+export interface SentInvitation {
+  id: string;
+  invitee_label: string;
+  code: string;
+  is_link: boolean;
+  created_at: string;
+  expires_at: string | null;
+}
+
+export const MAX_HOUSEHOLD_MEMBERS = 4;

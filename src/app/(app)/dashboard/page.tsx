@@ -15,6 +15,7 @@ import {
 } from "recharts";
 import { GlassCard } from "@/components/dashboard/GlassCard";
 import { StatChip } from "@/components/dashboard/StatChip";
+import { InvitationsBanner } from "@/components/InvitationsBanner";
 import { DonutChart } from "@/components/dashboard/DonutChart";
 import { StackedBar } from "@/components/dashboard/StackedBar";
 import { PeriodFilter, PeriodFilterValue, monthKeysFromPeriod } from "@/components/dashboard/PeriodFilter";
@@ -107,6 +108,9 @@ export default function DashboardPage() {
           <StatChip label="Saldo" value={balance} icon={Wallet2} tone="primary" />
           <StatChip label="Cartão" value={totalCredit} icon={CreditCard} tone="neutral" />
         </div>
+
+        {/* Convites recebidos para participar de um planejamento (largura total) */}
+        <InvitationsBanner hasHousehold={!!householdId} />
 
         {/* 2. Gastos por forma de pagamento (esquerda) + Receitas x Despesas (direita) */}
         <div className="grid grid-cols-1 gap-4 lg:grid-cols-5">

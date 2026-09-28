@@ -10,6 +10,7 @@ import { Modal } from "@/components/ui/Modal";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { createClient } from "@/lib/supabase/client";
+import { MAX_HOUSEHOLD_MEMBERS } from "@/lib/types";
 
 const MEMBER_COLORS = ["#2878F8", "#3F67BF", "#33B669", "#EED146"];
 
@@ -50,12 +51,16 @@ export default function ConfiguracoesPage() {
     if (!householdId) return;
     // Segunda pessoa sem login próprio: fica sem profile_id — é apenas um
     // perfil de lançamento dentro da mesma household (sem convite por e-mail no MVP).
-    await supabase.from("household_members").insert({
+    const { error } = await supabase.from("household_members").insert({
       household_id: householdId,
       profile_id: null,
       display_name: memberName,
       color: MEMBER_COLORS[members.length % MEMBER_COLORS.length],
     });
+    if (error) {
+      alert(error.message);
+      return;
+    }
     setMemberName("");
     setMemberOpen(false);
     reload();
@@ -90,7 +95,13 @@ export default function ConfiguracoesPage() {
         <Card>
           <div className="mb-3 flex items-center justify-between">
             <h3 className="font-medium">Membros da família</h3>
-            <Button size="sm" variant="secondary" onClick={() => setMemberOpen(true)}>
+            <Button
+              size="sm"
+              variant="secondary"
+              disabled={members.length >= MAX_HOUSEHOLD_MEMBERS}
+              title={members.length >= MAX_HOUSEHOLD_MEMBERS ? "Limite de 4 pessoas por planejamento" : undefined}
+              onClick={() => setMemberOpen(true)}
+            >
               <Plus className="h-4 w-4" /> Adicionar pessoa
             </Button>
           </div>
