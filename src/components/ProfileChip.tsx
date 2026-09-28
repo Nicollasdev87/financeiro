@@ -9,7 +9,7 @@ function initials(name: string) {
 }
 
 export function ProfileChip() {
-  const { name, avatarUrl, loading } = useCurrentUser();
+  const { name, avatarUrl, userCode, loading } = useCurrentUser();
 
   if (loading || !name) return null;
 
@@ -26,7 +26,10 @@ export function ProfileChip() {
           {initials(name)}
         </div>
       )}
-      <span className="max-w-[120px] truncate text-sm font-medium text-text">{name}</span>
+      <div className="flex min-w-0 flex-col leading-tight">
+        <span className="max-w-[120px] truncate text-sm font-medium text-text">{name}</span>
+        {userCode && <span className="text-[11px] font-light tracking-wide text-text-tertiary">{userCode}</span>}
+      </div>
     </Link>
   );
 }
