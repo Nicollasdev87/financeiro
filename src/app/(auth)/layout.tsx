@@ -44,9 +44,12 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
         }}
       />
 
-      {/* O card em si: largura/altura contidas, não estica pra tela toda */}
-      <div className="relative grid w-full max-w-[1040px] grid-cols-1 overflow-hidden rounded-[28px] border border-border bg-surface shadow-2xl lg:min-h-[600px] lg:grid-cols-[1fr_1.05fr]">
-        <div className="flex flex-col">
+      {/* O card em si: um único bloco com o degradê (mesmo tom da ilustração)
+          "englobando" tudo — o formulário fica como um cartão branco
+          flutuando por cima desse degradê, em vez de dividir a tela em duas
+          cores estanques. */}
+      <div className="relative grid w-full max-w-[1040px] grid-cols-1 gap-3 overflow-hidden rounded-[28px] bg-gradient-to-br from-[#0B1220] via-[#12203A] to-[#184787] p-3 shadow-2xl sm:p-4 lg:min-h-[600px] lg:grid-cols-[1fr_1.05fr] lg:gap-4 lg:p-4">
+        <div className="flex flex-col overflow-hidden rounded-[20px] bg-surface">
           <header className="flex items-center justify-between px-6 pt-6 sm:px-10">
             <Link href="/login" className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-control bg-primary text-white">

@@ -4,7 +4,9 @@ export function AuthPanel({ title, subtitle }: { title: string; subtitle: string
   const circumference = 2 * Math.PI * radius;
 
   return (
-    <div className="relative flex h-full w-full flex-col justify-between overflow-hidden bg-gradient-to-br from-[#0B1220] via-[#12203A] to-[#184787] p-10">
+    // Sem fundo próprio de propósito: o degradê é o do card externo (ver
+    // `(auth)/layout.tsx`) — esse painel só fica "por cima" dele, unido.
+    <div className="relative flex h-full w-full flex-col justify-between p-10">
       {/* Textura decorativa — só quadradinhos soltos, sem nenhuma informação real */}
       <span className="pointer-events-none absolute right-10 top-10 h-3 w-3 rounded-sm bg-white/10" />
       <span className="pointer-events-none absolute right-24 top-24 h-2 w-2 rounded-sm bg-white/10" />

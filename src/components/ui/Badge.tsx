@@ -10,7 +10,10 @@ export function Badge({
   className?: string;
 }) {
   const tones = {
-    neutral: "bg-primary-light text-white",
+    // Antes era "bg-primary-light text-white": um azul quase transparente com
+    // texto branco, ilegível no tema claro (fundo clarinho + letra clara).
+    // Segue o mesmo padrão das outras tonalidades: cor no texto, não no fundo.
+    neutral: "bg-primary/10 text-primary",
     success: "bg-success/10 text-success",
     warning: "bg-warning/10 text-warning",
     danger: "bg-danger/10 text-danger",
