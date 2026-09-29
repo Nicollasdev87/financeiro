@@ -16,6 +16,7 @@ import {
 import { GlassCard } from "@/components/dashboard/GlassCard";
 import { StatChip } from "@/components/dashboard/StatChip";
 import { InvitationsBanner } from "@/components/InvitationsBanner";
+import { PageHeader } from "@/components/PageHeader";
 import { DonutChart } from "@/components/dashboard/DonutChart";
 import { StackedBar } from "@/components/dashboard/StackedBar";
 import { PeriodFilter, PeriodFilterValue, monthKeysFromPeriod } from "@/components/dashboard/PeriodFilter";
@@ -91,13 +92,9 @@ export default function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="flex flex-wrap items-center justify-between gap-3 pl-5">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-xl font-semibold text-text">Dashboard</h1>
-          <p className="text-sm text-text-secondary">Visão geral financeira.</p>
-        </div>
+      <PageHeader title="Dashboard" subtitle="Visão geral financeira.">
         <PeriodFilter value={period} onChange={setPeriod} />
-      </div>
+      </PageHeader>
 
       <div className="flex flex-col gap-4">
         {/* 1. Resumo rápido */}

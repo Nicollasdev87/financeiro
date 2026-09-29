@@ -4,6 +4,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import { Plus, PiggyBank } from "lucide-react";
 import { MonthSelector } from "@/components/MonthSelector";
+import { PageHeader } from "@/components/PageHeader";
 import { InvestmentCategoryRow } from "@/components/InvestmentCategoryRow";
 import { Card } from "@/components/ui/Card";
 import { Button } from "@/components/ui/Button";
@@ -114,13 +115,9 @@ export default function InvestimentosPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        <div>
-          <h1 className="text-xl font-semibold">Investimentos</h1>
-          <p className="text-sm text-text-secondary">Acompanhe seus aportes mês a mês</p>
-        </div>
+      <PageHeader title="Investimentos" subtitle="Acompanhe seus aportes mês a mês">
         <MonthSelector date={date} onPrev={() => setDate(addMonths(date, -1))} onNext={() => setDate(addMonths(date, 1))} />
-      </div>
+      </PageHeader>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <Card className="flex items-center justify-between">

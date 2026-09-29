@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { MonthSelector } from "@/components/MonthSelector";
+import { PageHeader } from "@/components/PageHeader";
 import { CategoryRow } from "@/components/CategoryRow";
 import { IncomeCategoryRow } from "@/components/IncomeCategoryRow";
 import { Card } from "@/components/ui/Card";
@@ -122,7 +123,9 @@ export default function MeuMesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <MonthSelector date={date} onPrev={() => setDate(addMonths(date, -1))} onNext={() => setDate(addMonths(date, 1))} />
+      <PageHeader title="Planejamento do mês" subtitle="Lance receitas e despesas e acompanhe o saldo.">
+        <MonthSelector date={date} onPrev={() => setDate(addMonths(date, -1))} onNext={() => setDate(addMonths(date, 1))} />
+      </PageHeader>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <Card className="flex items-center justify-between">

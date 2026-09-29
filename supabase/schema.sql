@@ -22,7 +22,9 @@ create table if not exists households (
   id uuid primary key default gen_random_uuid(),
   name text not null default 'Minha Família',
   created_by uuid references profiles(id) on delete set null,
-  created_at timestamptz not null default now()
+  created_at timestamptz not null default now(),
+  -- meta mensal de gasto no cartão (usada pelo card "Reduzir o cartão" em Evolução)
+  credit_card_goal numeric(12,2)
 );
 
 -- profile_id fica nulo para uma "segunda pessoa" que não tem login próprio

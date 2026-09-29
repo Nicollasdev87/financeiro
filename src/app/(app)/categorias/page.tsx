@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Modal } from "@/components/ui/Modal";
 import { Badge } from "@/components/ui/Badge";
+import { PageHeader } from "@/components/PageHeader";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { createClient } from "@/lib/supabase/client";
 import type { Category, CategoryKind, CategoryNature } from "@/lib/types";
@@ -140,15 +141,11 @@ export default function CategoriasPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-xl font-semibold">Categorias</h1>
-          <p className="text-sm text-text-secondary">Organize receitas e despesas</p>
-        </div>
+      <PageHeader title="Categorias" subtitle="Organize receitas, despesas e investimentos">
         <Button onClick={openNew}>
           <Plus className="h-4 w-4" /> Nova categoria
         </Button>
-      </div>
+      </PageHeader>
 
       <Section
         title="Despesas"

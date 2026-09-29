@@ -3,12 +3,15 @@
 import { useState } from "react";
 import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, Tooltip, CartesianGrid, Legend } from "recharts";
 import { Card } from "@/components/ui/Card";
+import { MonthSelector } from "@/components/MonthSelector";
+import { PageHeader } from "@/components/PageHeader";
+import { CreditCardReductionCard } from "@/components/CreditCardReductionCard";
 import { useHouseholdData } from "@/lib/hooks/useHouseholdData";
 import { useMonthsSummary } from "@/lib/hooks/useMonthsSummary";
-import { formatCurrency, formatCurrencyCompact, monthLabelShort } from "@/lib/utils";
+import { addMonths, formatCurrency, formatCurrencyCompact, monthLabelShort } from "@/lib/utils";
 
 export default function EvolucaoPage() {
-  const [date] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
+  const [date, setDate] = useState(() => new Date(new Date().getFullYear(), new Date().getMonth(), 1));
   const { householdId, loading } = useHouseholdData();
   const { summaries } = useMonthsSummary(householdId, date, 6);
 
@@ -25,10 +28,9 @@ export default function EvolucaoPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div>
-        <h1 className="text-xl font-semibold">Evolução</h1>
-        <p className="text-sm text-text-secondary">Como as finanças da família mudaram nos últimos meses</p>
-      </div>
+      <PageHeader title="Evolução" subtitle="Como as finanças da família mudaram nos últimos 6 meses">
+        <MonthSelector date={date} onPrev={() => setDate(addMonths(date, -1))} onNext={() => setDate(addMonths(date, 1))} />
+      </PageHeader>
 
       <Card>
         <ResponsiveContainer width="100%" height={280}>
@@ -113,6 +115,8 @@ export default function EvolucaoPage() {
           );
         })()}
       </Card>
+
+      <CreditCardReductionCard householdId={householdId} date={date} summaries={summaries} />
     </div>
   );
 }
