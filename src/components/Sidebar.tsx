@@ -8,7 +8,7 @@ import {
   PiggyBank,
   TrendingUp,
   Tags,
-  Settings,
+  UserRound,
   LogOut,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
@@ -20,7 +20,7 @@ const NAV = [
   { href: "/investimentos", label: "Investimentos", icon: PiggyBank },
   { href: "/evolucao", label: "Evolução", icon: TrendingUp },
   { href: "/categorias", label: "Categorias", icon: Tags },
-  { href: "/configuracoes", label: "Configurações", icon: Settings },
+  { href: "/perfil", label: "Perfil", icon: UserRound },
 ];
 
 /** Small floating label that appears to the right of an icon on hover. */
@@ -33,7 +33,7 @@ function HoverLabel({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Rail lateral fixo, integrado ao fundo do app (mesma cor de base, sem
+ * Rail lateral (sticky na coluna do menu), integrado ao fundo do app (mesma cor de base, sem
  * cartão/sombra pesada). Hover em cada ícone revela o nome do item.
  */
 export function Sidebar() {
@@ -47,7 +47,7 @@ export function Sidebar() {
   }
 
   return (
-    <aside className="fixed left-4 top-4 z-40 hidden w-16 flex-col items-center gap-5 rounded-card border border-border bg-background-secondary py-5 md:flex">
+    <aside className="sticky top-4 z-40 mt-4 hidden w-16 flex-col items-center gap-5 rounded-card border border-border bg-background-secondary py-5 md:flex">
       <nav className="flex flex-col items-center gap-5">
         {NAV.map(({ href, label, icon: Icon }) => {
           const active = pathname.startsWith(href);

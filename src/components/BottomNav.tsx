@@ -17,7 +17,6 @@ const MORE_ITEMS = [
   { href: "/evolucao", label: "Evolução" },
   { href: "/categorias", label: "Categorias" },
   { href: "/perfil", label: "Perfil" },
-  { href: "/configuracoes", label: "Configurações" },
 ];
 
 export function BottomNav() {
